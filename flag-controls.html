@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國旗調整控制面板</title>
+    <style>
+        .control-panel {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            max-width: 350px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        .control-panel h3 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 8px;
+        }
+
+        .country-section {
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #f8f8f8;
+            border-radius: 6px;
+        }
+
+        .country-section h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .control-row {
+            margin-bottom: 8px;
+        }
+
+        .control-row label {
+            display: inline-block;
+            width: 80px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .control-row input[type="range"] {
+            width: 150px;
+            vertical-align: middle;
+        }
+
+        .control-row input[type="number"] {
+            width: 60px;
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .value-display {
+            display: inline-block;
+            min-width: 50px;
+            font-size: 12px;
+            color: #333;
+            font-family: monospace;
+        }
+
+        .copy-btn {
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            width: 100%;
+        }
+
+        .copy-btn:hover {
+            background: #45a049;
+        }
+
+        .copy-btn:active {
+            background: #2e7d32;
+        }
+
+        .toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 16px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 2001;
+            font-size: 14px;
+        }
+
+        .toggle-btn:hover {
+            background: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <button class="toggle-btn" onclick="togglePanel()">🎛️ 調整國旗</button>
+
+    <div class="control-panel" id="controlPanel" style="display: none;">
+        <h3>國旗位置與大小調整</h3>
+
+        <!-- 美國本土 -->
+        <div class="country-section">
+            <h4>🇺🇸 美國本土</h4>
+            <div class="control-row">
+                <label>寬度:</label>
+                <input type="range" id="us-width" min="10" max="300" value="100" oninput="updateUS()">
+                <span class="value-display" id="us-width-val">100</span>
+            </div>
+            <div class="control-row">
+                <label>高度:</label>
+                <input type="range" id="us-height" min="7" max="200" value="66" oninput="updateUS()">
+                <span class="value-display" id="us-height-val">66</span>
+            </div>
+            <div class="control-row">
+                <label>X偏移:</label>
+                <input type="range" id="us-x" min="-200" max="200" value="0" oninput="updateUS()">
+                <span class="value-display" id="us-x-val">0</span>
+            </div>
+            <div class="control-row">
+                <label>Y偏移:</label>
+                <input type="range" id="us-y" min="-200" max="200" value="0" oninput="updateUS()">
+                <span class="value-display" id="us-y-val">0</span>
+            </div>
+            <button class="copy-btn" onclick="copyUSCode()">📋 複製程式碼</button>
+        </div>
+
+        <!-- 日本 -->
+        <div class="country-section">
+            <h4>🇯🇵 日本</h4>
+            <div class="control-row">
+                <label>寬度:</label>
+                <input type="range" id="japan-width" min="5" max="200" value="20" oninput="updateJapan()">
+                <span class="value-display" id="japan-width-val">20</span>
+            </div>
+            <div class="control-row">
+                <label>高度:</label>
+                <input type="range" id="japan-height" min="3" max="150" value="13" oninput="updateJapan()">
+                <span class="value-display" id="japan-height-val">13</span>
+            </div>
+            <div class="control-row">
+                <label>X偏移:</label>
+                <input type="range" id="japan-x" min="-100" max="100" value="0" oninput="updateJapan()">
+                <span class="value-display" id="japan-x-val">0</span>
+            </div>
+            <div class="control-row">
+                <label>Y偏移:</label>
+                <input type="range" id="japan-y" min="-100" max="100" value="0" oninput="updateJapan()">
+                <span class="value-display" id="japan-y-val">0</span>
+            </div>
+            <button class="copy-btn" onclick="copyJapanCode()">📋 複製程式碼</button>
+        </div>
+
+        <!-- 台灣 -->
+        <div class="country-section">
+            <h4>🇹🇼 台灣</h4>
+            <div class="control-row">
+                <label>寬度:</label>
+                <input type="range" id="taiwan-width" min="5" max="200" value="15" oninput="updateTaiwan()">
+                <span class="value-display" id="taiwan-width-val">15</span>
+            </div>
+            <div class="control-row">
+                <label>高度:</label>
+                <input type="range" id="taiwan-height" min="3" max="150" value="10" oninput="updateTaiwan()">
+                <span class="value-display" id="taiwan-height-val">10</span>
+            </div>
+            <div class="control-row">
+                <label>X偏移:</label>
+                <input type="range" id="taiwan-x" min="-100" max="100" value="0" oninput="updateTaiwan()">
+                <span class="value-display" id="taiwan-x-val">0</span>
+            </div>
+            <div class="control-row">
+                <label>Y偏移:</label>
+                <input type="range" id="taiwan-y" min="-100" max="100" value="0" oninput="updateTaiwan()">
+                <span class="value-display" id="taiwan-y-val">0</span>
+            </div>
+            <button class="copy-btn" onclick="copyTaiwanCode()">📋 複製程式碼</button>
+        </div>
+
+        <!-- 南韓 -->
+        <div class="country-section">
+            <h4>🇰🇷 南韓</h4>
+            <div class="control-row">
+                <label>寬度:</label>
+                <input type="range" id="korea-width" min="5" max="200" value="20" oninput="updateKorea()">
+                <span class="value-display" id="korea-width-val">20</span>
+            </div>
+            <div class="control-row">
+                <label>高度:</label>
+                <input type="range" id="korea-height" min="3" max="150" value="13" oninput="updateKorea()">
+                <span class="value-display" id="korea-height-val">13</span>
+            </div>
+            <div class="control-row">
+                <label>X偏移:</label>
+                <input type="range" id="korea-x" min="-100" max="100" value="0" oninput="updateKorea()">
+                <span class="value-display" id="korea-x-val">0</span>
+            </div>
+            <div class="control-row">
+                <label>Y偏移:</label>
+                <input type="range" id="korea-y" min="-100" max="100" value="0" oninput="updateKorea()">
+                <span class="value-display" id="korea-y-val">0</span>
+            </div>
+            <button class="copy-btn" onclick="copyKoreaCode()">📋 複製程式碼</button>
+        </div>
+    </div>
+
+    <script>
+        function togglePanel() {
+            const panel = document.getElementById('controlPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function updateUS() {
+            const width = document.getElementById('us-width').value;
+            const height = document.getElementById('us-height').value;
+            const x = document.getElementById('us-x').value;
+            const y = document.getElementById('us-y').value;
+
+            document.getElementById('us-width-val').textContent = width;
+            document.getElementById('us-height-val').textContent = height;
+            document.getElementById('us-x-val').textContent = x;
+            document.getElementById('us-y-val').textContent = y;
+
+            // 發送訊息給主視窗
+            window.opener?.postMessage({
+                type: 'updatePattern',
+                country: 'us',
+                width: parseInt(width),
+                height: parseInt(height),
+                x: parseInt(x),
+                y: parseInt(y)
+            }, '*');
+        }
+
+        function updateJapan() {
+            const width = document.getElementById('japan-width').value;
+            const height = document.getElementById('japan-height').value;
+            const x = document.getElementById('japan-x').value;
+            const y = document.getElementById('japan-y').value;
+
+            document.getElementById('japan-width-val').textContent = width;
+            document.getElementById('japan-height-val').textContent = height;
+            document.getElementById('japan-x-val').textContent = x;
+            document.getElementById('japan-y-val').textContent = y;
+
+            window.opener?.postMessage({
+                type: 'updatePattern',
+                country: 'japan',
+                width: parseInt(width),
+                height: parseInt(height),
+                x: parseInt(x),
+                y: parseInt(y)
+            }, '*');
+        }
+
+        function updateTaiwan() {
+            const width = document.getElementById('taiwan-width').value;
+            const height = document.getElementById('taiwan-height').value;
+            const x = document.getElementById('taiwan-x').value;
+            const y = document.getElementById('taiwan-y').value;
+
+            document.getElementById('taiwan-width-val').textContent = width;
+            document.getElementById('taiwan-height-val').textContent = height;
+            document.getElementById('taiwan-x-val').textContent = x;
+            document.getElementById('taiwan-y-val').textContent = y;
+
+            window.opener?.postMessage({
+                type: 'updatePattern',
+                country: 'taiwan',
+                width: parseInt(width),
+                height: parseInt(height),
+                x: parseInt(x),
+                y: parseInt(y)
+            }, '*');
+        }
+
+        function updateKorea() {
+            const width = document.getElementById('korea-width').value;
+            const height = document.getElementById('korea-height').value;
+            const x = document.getElementById('korea-x').value;
+            const y = document.getElementById('korea-y').value;
+
+            document.getElementById('korea-width-val').textContent = width;
+            document.getElementById('korea-height-val').textContent = height;
+            document.getElementById('korea-x-val').textContent = x;
+            document.getElementById('korea-y-val').textContent = y;
+
+            window.opener?.postMessage({
+                type: 'updatePattern',
+                country: 'korea',
+                width: parseInt(width),
+                height: parseInt(height),
+                x: parseInt(x),
+                y: parseInt(y)
+            }, '*');
+        }
+
+        function copyUSCode() {
+            const w = document.getElementById('us-width').value;
+            const h = document.getElementById('us-height').value;
+            const x = document.getElementById('us-x').value;
+            const y = document.getElementById('us-y').value;
+            const code = `width: ${w}, height: ${h}, x: ${x}, y: ${y}`;
+            navigator.clipboard.writeText(code);
+            alert('✓ 已複製美國設定');
+        }
+
+        function copyJapanCode() {
+            const w = document.getElementById('japan-width').value;
+            const h = document.getElementById('japan-height').value;
+            const x = document.getElementById('japan-x').value;
+            const y = document.getElementById('japan-y').value;
+            const code = `width: ${w}, height: ${h}, x: ${x}, y: ${y}`;
+            navigator.clipboard.writeText(code);
+            alert('✓ 已複製日本設定');
+        }
+
+        function copyTaiwanCode() {
+            const w = document.getElementById('taiwan-width').value;
+            const h = document.getElementById('taiwan-height').value;
+            const x = document.getElementById('taiwan-x').value;
+            const y = document.getElementById('taiwan-y').value;
+            const code = `width: ${w}, height: ${h}, x: ${x}, y: ${y}`;
+            navigator.clipboard.writeText(code);
+            alert('✓ 已複製台灣設定');
+        }
+
+        function copyKoreaCode() {
+            const w = document.getElementById('korea-width').value;
+            const h = document.getElementById('korea-height').value;
+            const x = document.getElementById('korea-x').value;
+            const y = document.getElementById('korea-y').value;
+            const code = `width: ${w}, height: ${h}, x: ${x}, y: ${y}`;
+            navigator.clipboard.writeText(code);
+            alert('✓ 已複製南韓設定');
+        }
+    </script>
+</body>
+</html>

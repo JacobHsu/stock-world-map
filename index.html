@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球股市指數地圖</title>
+    <meta name="description" content="全球股市指數即時數據地圖，包含美國、德國、英國、法國、日本、韓國、台灣、香港、中國等主要市場指數">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' style='filter: grayscale(100%);'>🌐</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- amCharts 5 Libraries -->
+    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+</head>
+<body>
+    <!-- Logo -->
+    <div class="logo">World Stock</div>
+
+    <!-- World Map Container -->
+    <div class="map-container">
+        <!-- Map Background -->
+        <div id="chartdiv" class="world-map"></div>
+
+        <!-- Stock Index Cards -->
+        
+        <!-- 美國指數 -->
+        <div class="index-card" style="left: 23.7%; top: 32.6%;">
+            <div class="card-header">
+                <img src="https://flagcdn.com/w40/us.png" alt="US Flag" class="flag">
+                <div class="date-status">
+                    <div class="date">-</div>
+                    <div class="status closed">載入中...</div>
+                </div>
+            </div>
+            <div class="index-name">道瓊指數</div>
+            <div class="index-value neutral skeleton">---------- <span class="change">--------</span></div>
+        </div>
+
+        <!-- 英國指數 -->
+        <div class="index-card" style="left: 38.1%; top: 28.5%;">
+            <div class="card-header">
+                <img src="https://flagcdn.com/w40/gb.png" alt="UK Flag" class="flag">
+                <div class="date-status">
+                    <div class="date">-</div>
+                    <div class="status closed">載入中...</div>
+                </div>
+            </div>
+            <div class="index-name">英國指數</div>
+            <div class="index-value neutral skeleton">---------- <span class="change">--------</span></div>
+        </div>
+
+        <!-- 德國指數 -->
+        <div class="index-card" style="left: 54%; top: 40.5%;">
+            <div class="card-header">
+                <img src="https://flagcdn.com/w40/de.png" alt="Germany Flag" class="flag">
+                <div class="date-status">
+                    <div class="date">-</div>
+                    <div class="status closed">載入中...</div>
+                </div>
+            </div>
+            <div class="index-name">德國指數</div>
+            <div class="index-value neutral skeleton">---------- <span class="change">--------</span></div>
+        </div>
+
+        <!-- 法國指數 -->
+        <div class="index-card" style="left: 38.5%; top: 49.3%;">
+            <div class="card-header">
+                <img src="https://flagcdn.com/w40/fr.png" alt="France Flag" class="flag">
+                <div class="date-status">
+                    <div class="date">-</div>
+                    <div class="status closed">載入中...</div>
+                </div>
+            </div>
+            <div class="index-name">法國指數</div>
+            <div class="index-value neutral skeleton">---------- <span class="change">--------</span></div>
+        </div>
+
+        <!-- 南韓綜合 -->
+        <div class="index-card" style="left: 66.1%; top: 40.6%;">
+            <div class="card-header">
+                <img src="https://flagcdn.com/w40/kr.png" alt="South Korea Flag" class="flag">
+                <div class="date-status">
+                    <div class="date">-</div>
+                    <div class="status closed">載入中...</div>
+                </div>
+            </div>
+            <div class="index-name">南韓綜合</div>
+            <div class="index-value neutral skeleton">---------- <span class="change">--------</span></div>
+        </div>
+
+        <!-- 日本日經 -->
+        <div class="index-card" style="left: 81%; top: 46%;">
+            <div class="card-header">
+                <img src="https://flagcdn.com/w40/jp.png" alt="Japan Flag" class="flag">
+                <div class="date-status">
+                    <div class="date">-</div>
+                    <div class="status closed">載入中...</div>
+                </div>
+            </div>
+            <div class="index-name">日本日經</div>
+            <div class="index-value neutral skeleton">---------- <span class="change">--------</span></div>
+        </div>
+
+        <!-- 香港恆生 -->
+        <div class="index-card" style="left: 63.1%; top: 60.2%;">
+            <div class="card-header">
+                <img src="https://flagcdn.com/w40/hk.png" alt="Hong Kong Flag" class="flag">
+                <div class="date-status">
+                    <div class="date">-</div>
+                    <div class="status closed">載入中...</div>
+                </div>
+            </div>
+            <div class="index-name">香港恆生</div>
+            <div class="index-value neutral skeleton">---------- <span class="change">--------</span></div>
+        </div>
+
+        <!-- 加權指數 -->
+        <div class="index-card" style="left: 76%; top: 60%;">
+            <div class="card-header">
+                <img src="https://flagcdn.com/w40/tw.png" alt="Taiwan Flag" class="flag">
+                <div class="date-status">
+                    <div class="date">-</div>
+                    <div class="status closed">載入中...</div>
+                </div>
+            </div>
+            <div class="index-name">加權指數</div>
+            <div class="index-value neutral skeleton">---------- <span class="change">--------</span></div>
+        </div>
+    </div>
+
+    <!-- 浮動國旗調整面板 -->
+    <button class="flag-adjuster-toggle" id="flagAdjusterToggle" onclick="toggleFlagAdjuster()">🎯</button>
+
+    <div class="flag-adjuster-panel" id="flagAdjusterPanel">
+        <div class="flag-adjuster-header" id="flagAdjusterHeader">
+            <span class="flag-adjuster-title">🎯 國旗位置調整</span>
+            <button class="flag-adjuster-close" onclick="toggleFlagAdjuster()">×</button>
+        </div>
+
+        <div class="flag-adjuster-content">
+            <!-- 國家選擇 -->
+            <div class="adjuster-section">
+                <label>選擇國家</label>
+                <select id="flagCountrySelect" onchange="selectFlagCountry(this.value)">
+                    <option value="us">🇺🇸 美國</option>
+                    <option value="gb">🇬🇧 英國</option>
+                    <option value="de">🇩🇪 德國</option>
+                    <option value="fr">🇫🇷 法國</option>
+                    <option value="kr">🇰🇷 南韓</option>
+                    <option value="jp">🇯🇵 日本</option>
+                    <option value="hk">🇭🇰 香港</option>
+                    <option value="tw">🇹🇼 台灣</option>
+                </select>
+            </div>
+
+            <!-- 方向控制 -->
+            <div class="adjuster-section">
+                <label>位置調整</label>
+                <div class="adjuster-direction-pad">
+                    <div></div>
+                    <button class="adjuster-btn" onclick="moveFlagDirection('up')">↑</button>
+                    <div></div>
+                    <button class="adjuster-btn" onclick="moveFlagDirection('left')">←</button>
+                    <button class="adjuster-btn center" onclick="resetFlagPosition()">⊙</button>
+                    <button class="adjuster-btn" onclick="moveFlagDirection('right')">→</button>
+                    <div></div>
+                    <button class="adjuster-btn" onclick="moveFlagDirection('down')">↓</button>
+                    <div></div>
+                </div>
+            </div>
+
+            <!-- 座標調整 -->
+            <div class="adjuster-section">
+                <label>座標 (拖曳地圖國旗或使用滑桿)</label>
+                <div class="adjuster-slider-row">
+                    <span>經度</span>
+                    <input type="range" id="lonSlider" min="-180" max="180" step="0.5" value="0" oninput="adjustFlagBySlider('lon', this.value)">
+                    <div class="adjuster-value" id="adjusterLon">0.0</div>
+                </div>
+                <div class="adjuster-slider-row">
+                    <span>緯度</span>
+                    <input type="range" id="latSlider" min="-90" max="90" step="0.5" value="0" oninput="adjustFlagBySlider('lat', this.value)">
+                    <div class="adjuster-value" id="adjusterLat">0.0</div>
+                </div>
+            </div>
+
+            <!-- 大小控制 -->
+            <div class="adjuster-section">
+                <label>大小 (圓形直徑)</label>
+                <div class="adjuster-param">
+                    <span>縮放</span>
+                    <button class="adjuster-btn-sm" onclick="adjustFlagSize(-10)">縮小</button>
+                    <button class="adjuster-btn-sm" onclick="adjustFlagSize(10)">放大</button>
+                </div>
+                <div class="adjuster-size-display">
+                    直徑: <span id="adjusterSize">120</span> px
+                </div>
+            </div>
+
+            <!-- 動作按鈕 -->
+            <div class="adjuster-actions">
+                <button class="adjuster-action-btn primary" onclick="copyFlagConfig()">📋 複製當前</button>
+                <button class="adjuster-action-btn secondary" onclick="exportAllFlags()">💾 匯出全部</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示訊息 -->
+    <div class="flag-toast" id="flagToast">已複製！</div>
+
+    <script src="stock-data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

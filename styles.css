@@ -1,0 +1,720 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft JhengHei', 'Arial', sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Logo */
+.logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: #666;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 1000;
+    text-shadow: none;
+}
+
+/* Map Container */
+.map-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.world-map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Remove old map-image styles since we're using amCharts now */
+
+/* Stock Index Cards */
+.index-card {
+    position: absolute;
+    background: #ffffff;
+    backdrop-filter: none;
+    border-radius: 8px;
+    padding: 16px;
+    min-width: 240px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    z-index: 10;
+    border: 1px solid #e0e0e0;
+    cursor: move;
+}
+
+.index-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    background: #ffffff;
+}
+
+.index-card.dragging {
+    opacity: 0.8;
+    cursor: grabbing;
+    z-index: 1000;
+}
+
+/* Position Display - 位置調整功能 (已隱藏) */
+.position-display {
+    display: none;  /* 已關閉位置調整功能 */
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    pointer-events: auto;
+    cursor: pointer;
+    z-index: 10;
+    user-select: none;
+    transition: background 0.2s ease;
+}
+
+.position-display:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.position-display:active {
+    background: rgba(67, 160, 71, 0.9);
+}
+
+/* Card Header */
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.flag {
+    width: 40px;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.date-status {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.date {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}
+
+.status {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    display: inline-block;
+    width: fit-content;
+    font-weight: 500;
+}
+
+.status.closed {
+    background: #f0f0f0;
+    color: #888;
+}
+
+/* 時差說明小灰字 */
+.time-note {
+    color: #999;
+    font-size: 10px;
+    font-weight: normal;
+    margin-left: 4px;
+}
+
+/* 休市說明 */
+.holiday-note {
+    color: #e65100;
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.status.open {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+/* Index Information */
+.index-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.index-value {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.index-value.up {
+    color: #d32f2f;
+}
+
+.index-value.down {
+    color: #2e7d32;
+}
+
+.index-value.neutral {
+    color: #666;
+}
+
+.change {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Sub Indices */
+.sub-indices {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 10px;
+}
+
+.sub-indices.compact {
+    border-top: none;
+    padding-top: 0;
+}
+
+.sub-index {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    gap: 12px;
+}
+
+.sub-name {
+    color: #555;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.sub-value {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sub-value.up {
+    color: #d32f2f;
+}
+
+.sub-value.down {
+    color: #2e7d32;
+}
+
+.sub-value.neutral {
+    color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .index-card {
+        min-width: 200px;
+        padding: 12px;
+        font-size: 14px;
+    }
+    
+    .index-name {
+        font-size: 16px;
+    }
+    
+    .index-value {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .map-container {
+        height: auto;
+        min-height: 100vh;
+        padding: 80px 20px 20px;
+    }
+    
+    .index-card {
+        position: static !important;
+        margin-bottom: 16px;
+        width: 100%;
+    }
+    
+    .logo {
+        font-size: 20px;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.index-card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Pulse effect for live data */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.status.open {
+    animation: pulse 2s infinite;
+}
+
+/* 骨架屏載入效果 */
+@keyframes skeleton-loading {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 4px;
+    color: transparent !important;
+}
+
+.skeleton * {
+    visibility: hidden;
+}
+
+.index-value.neutral {
+    color: #999;
+}
+
+.index-value.neutral .change {
+    color: #999;
+}
+
+/* Flag Position Controls */
+.flag-controls {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.flag-controls-title {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.flag-controls-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    max-width: 120px;
+}
+
+.flag-control-btn {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.flag-control-btn:hover {
+    background: #e0e0e0;
+    border-color: #999;
+}
+
+.flag-control-btn:active {
+    background: #d0d0d0;
+    transform: scale(0.95);
+}
+
+.flag-control-btn.center {
+    background: #fff;
+    font-size: 12px;
+    color: #666;
+}
+
+.flag-control-btn.center:hover {
+    background: #f0f0f0;
+}
+
+.flag-coords {
+    font-size: 10px;
+    color: #999;
+    margin-top: 6px;
+    font-family: monospace;
+    text-align: center;
+}
+
+/* ==================== 浮動國旗調整面板 ==================== */
+
+/* 開啟按鈕 (已隱藏) */
+.flag-adjuster-toggle {
+    display: none;  /* 已隱藏國旗調整浮球 */
+    bottom: 20px;
+    left: 20px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    z-index: 2000;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.flag-adjuster-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.flag-adjuster-toggle.hidden {
+    display: none;
+}
+
+/* 調整面板 */
+.flag-adjuster-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 320px;
+    max-height: 80vh;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 2001;
+    overflow: hidden;
+    transform: translateX(-400px);
+    transition: transform 0.3s ease;
+}
+
+.flag-adjuster-panel.show {
+    transform: translateX(0);
+}
+
+/* 標題列 */
+.flag-adjuster-header {
+    padding: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    cursor: move;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flag-adjuster-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.flag-adjuster-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.flag-adjuster-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* 內容區 */
+.flag-adjuster-content {
+    padding: 16px;
+    max-height: calc(80vh - 60px);
+    overflow-y: auto;
+}
+
+.adjuster-section {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.adjuster-section:last-of-type {
+    border-bottom: none;
+}
+
+.adjuster-section label {
+    display: block;
+    font-size: 11px;
+    color: #999;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.adjuster-section select {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+}
+
+/* 方向鍵盤 */
+.adjuster-direction-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.adjuster-btn {
+    height: 44px;
+    border: none;
+    background: #667eea;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+}
+
+.adjuster-btn:hover {
+    background: #5568d3;
+    transform: scale(1.05);
+}
+
+.adjuster-btn.center {
+    background: #e0e0e0;
+    color: #666;
+}
+
+.adjuster-btn.center:hover {
+    background: #d0d0d0;
+}
+
+/* 參數調整 */
+.adjuster-param {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 6px;
+}
+
+.adjuster-param span {
+    width: 50px;
+    font-size: 12px;
+    color: #666;
+}
+
+.adjuster-value {
+    flex: 1;
+    padding: 6px 10px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.adjuster-btn-sm {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: #667eea;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.adjuster-btn-sm:hover {
+    background: #5568d3;
+}
+
+.adjuster-size-display {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 14px;
+    color: #666;
+    font-family: monospace;
+}
+
+/* 滑桿調整 */
+.adjuster-slider-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 8px;
+}
+
+.adjuster-slider-row span {
+    width: 50px;
+    font-size: 12px;
+    color: #666;
+}
+
+.adjuster-slider-row input[type="range"] {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: #e0e0e0;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.adjuster-slider-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.adjuster-slider-row input[type="range"]::-webkit-slider-thumb:hover {
+    background: #5568d3;
+}
+
+.adjuster-slider-row input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s;
+}
+
+.adjuster-slider-row input[type="range"]::-moz-range-thumb:hover {
+    background: #5568d3;
+}
+
+.adjuster-slider-row .adjuster-value {
+    width: 50px;
+    padding: 4px 6px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 11px;
+    text-align: center;
+}
+
+/* 動作按鈕 */
+.adjuster-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.adjuster-action-btn {
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.adjuster-action-btn.primary {
+    background: #4CAF50;
+    color: white;
+}
+
+.adjuster-action-btn.primary:hover {
+    background: #45a049;
+}
+
+.adjuster-action-btn.secondary {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.adjuster-action-btn.secondary:hover {
+    background: #f0f0ff;
+}
+
+/* 提示訊息 */
+.flag-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(76, 175, 80, 0.95);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.flag-toast.show {
+    opacity: 1;
+}
