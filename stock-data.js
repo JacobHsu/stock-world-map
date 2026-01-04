@@ -549,38 +549,46 @@ class ETFUIUpdater {
             const symbolEl = item.querySelector('.etf-symbol');
             if (symbolEl) {
                 const symbol = symbolEl.textContent.trim();
-                mapping[symbol] = item;
+                // 支持同一個 symbol 對應多個 HTML 元素（例如 VTI 在世界組合和北美 ETF 都有）
+                if (!mapping[symbol]) {
+                    mapping[symbol] = [];
+                }
+                mapping[symbol].push(item);
             }
         });
 
-        console.log(`📋 ETF 卡片映射: ${Object.keys(mapping).length} 個`);
+        const totalItems = Object.values(mapping).reduce((sum, items) => sum + items.length, 0);
+        console.log(`📋 ETF 卡片映射: ${Object.keys(mapping).length} 個 symbol, ${totalItems} 個項目`);
         return mapping;
     }
 
     updateETFItem(symbol, data) {
-        const item = this.etfMapping[symbol];
-        if (!item || !data) {
+        const items = this.etfMapping[symbol];
+        if (!items || !data) {
             return;
         }
 
-        // 更新價格
-        const priceEl = item.querySelector('.etf-price');
-        if (priceEl && data.price) {
-            priceEl.textContent = `$${this.dataManager.formatNumber(data.price, 2)}`;
-        }
+        // 更新所有相同 symbol 的項目（支持重複的 ETF）
+        items.forEach(item => {
+            // 更新價格
+            const priceEl = item.querySelector('.etf-price');
+            if (priceEl && data.price) {
+                priceEl.textContent = `$${this.dataManager.formatNumber(data.price, 2)}`;
+            }
 
-        // 更新漲跌
-        const changeEl = item.querySelector('.etf-change');
-        if (changeEl && data.changePercent !== undefined) {
-            const change = data.change || 0;
-            const changePercent = data.changePercent || 0;
-            const direction = change >= 0 ? 'up' : 'down';
-            const arrow = change >= 0 ? '▲' : '▼';
-            const sign = change >= 0 ? '+' : '';
+            // 更新漲跌
+            const changeEl = item.querySelector('.etf-change');
+            if (changeEl && data.changePercent !== undefined) {
+                const change = data.change || 0;
+                const changePercent = data.changePercent || 0;
+                const direction = change >= 0 ? 'up' : 'down';
+                const arrow = change >= 0 ? '▲' : '▼';
+                const sign = change >= 0 ? '+' : '';
 
-            changeEl.className = 'etf-change ' + direction;
-            changeEl.textContent = `${arrow}${sign}${changePercent.toFixed(2)}%`;
-        }
+                changeEl.className = 'etf-change ' + direction;
+                changeEl.textContent = `${arrow}${sign}${changePercent.toFixed(2)}%`;
+            }
+        });
     }
 
     updateCountryETFColor(countryCode, avgChange) {

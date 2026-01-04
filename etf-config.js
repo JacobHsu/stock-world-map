@@ -9,6 +9,19 @@ const ETF_CONFIG = {
 
     // ETF 列表，含國家代碼映射
     etfs: [
+        // 全球組合 ETF
+        { symbol: 'VT', name: 'World Total', country: 'world', countryName: '全球' },
+        { symbol: 'VXUS', name: 'Ex-US', country: 'world', countryName: '全球' },
+        { symbol: 'AAXJ', name: 'Asia ex-Japan', country: 'world', countryName: '全球' },
+        { symbol: 'VGK', name: 'Europe', country: 'world', countryName: '全球' },
+        { symbol: 'VPL', name: 'Pacific', country: 'world', countryName: '全球' },
+        { symbol: 'VWO', name: 'Emerging', country: 'world', countryName: '全球' },
+        { symbol: 'ITOT', name: 'US Total', country: 'world', countryName: '全球' },
+        { symbol: 'IEFA', name: 'Developed Ex-US', country: 'world', countryName: '全球' },
+        { symbol: 'IEUR', name: 'Europe', country: 'world', countryName: '全球' },
+        { symbol: 'IPAC', name: 'Asia Pacific', country: 'world', countryName: '全球' },
+        { symbol: 'IEMG', name: 'Emerging', country: 'world', countryName: '全球' },
+
         // 美洲
         { symbol: 'VTI', name: 'USA (Total Market)', country: 'us', countryName: '美國' },
         { symbol: 'VUG', name: 'USA (Growth)', country: 'us', countryName: '美國' },
