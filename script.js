@@ -5,21 +5,170 @@ var flagSprites = {};  // 所有國旗圖片物件
 var flagSeries = {};   // 所有國旗系列
 var countrySeries = {};  // 所有國家的多邊形系列
 var currentFlagCountry = 'us';  // 當前選中的國家
+var currentMode = 'stock';  // 當前模式: 'stock' = 股市指數, 'etf' = 國家 ETF
+
+// 股市指數模式的國家（現有）
+var stockModeCountries = ['us', 'gb', 'de', 'fr', 'kr', 'jp', 'hk', 'tw'];
+
+// ETF 模式的國家（包含共用國家 + ETF 專用國家）
+var etfModeCountries = [
+    // 共用
+    'us', 'gb', 'de', 'fr', 'kr', 'jp', 'hk', 'tw',
+    // 美洲
+    'ca', 'br', 'mx', 'ar', 'co',
+    // 歐洲
+    'it', 'es', 'nl', 'ch', 'pl', 'be', 'se', 'ie', 'at', 'no', 'dk',
+    // 亞太
+    'cn', 'in', 'id', 'sg', 'th', 'vn', 'ph', 'my', 'au',
+    // 中東
+    'tr', 'sa', 'il', 'ae',
+    // 非洲
+    'za'
+];
+
+// 模式切換函數
+function switchMode(mode) {
+    if (currentMode === mode) return;
+
+    currentMode = mode;
+    console.log(`🔄 切換模式: ${mode === 'stock' ? '股市指數' : '國家 ETF'}`);
+
+    // 更新 Tab UI
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        if (tab.dataset.mode === mode) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+
+    // 切換顯示內容
+    if (mode === 'stock') {
+        showStockMode();
+    } else {
+        showETFMode();
+    }
+}
+
+// 顯示股市指數模式
+function showStockMode() {
+    // 顯示所有股市指數卡片
+    document.querySelectorAll('.index-card').forEach(card => {
+        card.style.display = 'block';
+    });
+
+    // 顯示股市國家的國旗和顏色
+    stockModeCountries.forEach(code => {
+        if (flagSeries[code]) {
+            flagSeries[code].show();
+        }
+        if (countrySeries[code]) {
+            countrySeries[code].show();
+        }
+    });
+
+    // 隱藏 ETF 國家的國旗和顏色
+    etfModeCountries.forEach(code => {
+        if (flagSeries[code]) {
+            flagSeries[code].hide();
+        }
+        if (countrySeries[code]) {
+            countrySeries[code].hide();
+        }
+    });
+
+    console.log('📊 股市指數模式已啟用');
+}
+
+// 顯示 ETF 模式（清空地圖，準備顯示 ETF 國家）
+function showETFMode() {
+    // 隱藏所有股市指數卡片
+    document.querySelectorAll('.index-card').forEach(card => {
+        card.style.display = 'none';
+    });
+
+    // 隱藏股市國家的國旗和顏色
+    stockModeCountries.forEach(code => {
+        if (flagSeries[code]) {
+            flagSeries[code].hide();
+        }
+        if (countrySeries[code]) {
+            countrySeries[code].hide();
+        }
+    });
+
+    // 顯示 ETF 國家的國旗和顏色（目前尚未建立）
+    etfModeCountries.forEach(code => {
+        if (flagSeries[code]) {
+            flagSeries[code].show();
+        }
+        if (countrySeries[code]) {
+            countrySeries[code].show();
+        }
+    });
+
+    console.log('📈 ETF 模式已啟用 (地圖已清空，等待新增 ETF 國家)');
+}
+
+// 暴露到全域
+window.switchMode = switchMode;
 
 // 國旗配置數據（經緯度座標）- 圓形國旗
+// mode: 'stock' = 股市指數模式顯示, 'etf' = ETF 模式顯示, 'both' = 兩種模式都顯示
 var flagsConfig = {
-    us: { lon: -100, lat: 40, size: 100, name: '美國', code: 'us' },
-    gb: { lon: -1.4, lat: 52.4, size: 20, name: '英國', code: 'gb' },
-    de: { lon: 10, lat: 51, size: 20, name: '德國', code: 'de' },
-    fr: { lon: 2.8, lat: 46.6, size: 20, name: '法國', code: 'fr' },
-    kr: { lon: 128, lat: 36.5, size: 14, name: '南韓', code: 'kr' },
-    jp: { lon: 139, lat: 36.3, size: 14, name: '日本', code: 'jp' },
-    hk: { lon: 114, lat: 22, size: 7, name: '香港', code: 'hk' },
-    tw: { lon: 121, lat: 24, size: 7, name: '台灣', code: 'tw' }
+    // ===== 股市指數 + ETF 共用 =====
+    us: { lon: -100.0, lat: 40.0, size: 100, name: '美國', code: 'us', mode: 'both' },
+    gb: { lon: -1.4, lat: 52.4, size: 20, name: '英國', code: 'gb', mode: 'both' },
+    de: { lon: 10, lat: 51, size: 20, name: '德國', code: 'de', mode: 'both' },
+    fr: { lon: 2.8, lat: 46.6, size: 20, name: '法國', code: 'fr', mode: 'both' },
+    kr: { lon: 128, lat: 36.5, size: 14, name: '南韓', code: 'kr', mode: 'both' },
+    jp: { lon: 139, lat: 36.3, size: 14, name: '日本', code: 'jp', mode: 'both' },
+    hk: { lon: 114, lat: 22, size: 10, name: '香港', code: 'hk', mode: 'both' },
+    tw: { lon: 121, lat: 24, size: 10, name: '台灣', code: 'tw', mode: 'both' },
+
+    // ===== ETF 專用 - 美洲 =====
+    ca: { lon: -106.0, lat: 56.0, size: 100, name: '加拿大', code: 'ca', mode: 'etf' },
+    br: { lon: -51.0, lat: -14.0, size: 55, name: '巴西', code: 'br', mode: 'etf' },
+    mx: { lon: -102.0, lat: 23.0, size: 30, name: '墨西哥', code: 'mx', mode: 'etf' },
+    ar: { lon: -64.0, lat: -34.0, size: 40, name: '阿根廷', code: 'ar', mode: 'etf' },
+    co: { lon: -74.0, lat: 4.0, size: 22, name: '哥倫比亞', code: 'co', mode: 'etf' },
+
+    // ===== ETF 專用 - 歐洲 =====
+    it: { lon: 12.5, lat: 42.8, size: 10, name: '義大利', code: 'it', mode: 'etf' },
+    es: { lon: -3.7, lat: 40.4, size: 20, name: '西班牙', code: 'es', mode: 'etf' },
+    nl: { lon: 5.3, lat: 52.1, size: 10, name: '荷蘭', code: 'nl', mode: 'etf' },
+    ch: { lon: 8.2, lat: 46.8, size: 10, name: '瑞士', code: 'ch', mode: 'etf' },
+    pl: { lon: 19.1, lat: 51.9, size: 20, name: '波蘭', code: 'pl', mode: 'etf' },
+    be: { lon: 4.4, lat: 50.8, size: 8, name: '比利時', code: 'be', mode: 'etf' },
+    se: { lon: 18.6, lat: 60.1, size: 20, name: '瑞典', code: 'se', mode: 'etf' },
+    ie: { lon: -8, lat: 53.4, size: 10, name: '愛爾蘭', code: 'ie', mode: 'etf' },
+    at: { lon: 14.6, lat: 47.5, size: 10, name: '奧地利', code: 'at', mode: 'etf' },
+    no: { lon: 8.5, lat: 60.5, size: 20, name: '挪威', code: 'no', mode: 'etf' },
+    dk: { lon: 9.5, lat: 56, size: 10, name: '丹麥', code: 'dk', mode: 'etf' },
+
+    // ===== ETF 專用 - 亞太 =====
+    cn: { lon: 105.5, lat: 34.0, size: 60, name: '中國', code: 'cn', mode: 'etf' },
+    in: { lon: 79.5, lat: 22.0, size: 35, name: '印度', code: 'in', mode: 'etf' },
+    id: { lon: 114.0, lat: -1.0, size: 14, name: '印尼', code: 'id', mode: 'etf' },
+    sg: { lon: 103.8, lat: 1.3, size: 8, name: '新加坡', code: 'sg', mode: 'etf' },
+    th: { lon: 101.0, lat: 15.0, size: 14, name: '泰國', code: 'th', mode: 'etf' },
+    vn: { lon: 108.0, lat: 14.0, size: 12, name: '越南', code: 'vn', mode: 'etf' },
+    ph: { lon: 121.2, lat: 17.0, size: 8, name: '菲律賓', code: 'ph', mode: 'etf' },
+    my: { lon: 102.0, lat: 4.0, size: 10, name: '馬來西亞', code: 'my', mode: 'etf' },
+    au: { lon: 133, lat: -25, size: 40, name: '澳洲', code: 'au', mode: 'etf' },
+
+    // ===== ETF 專用 - 中東 =====
+    tr: { lon: 35, lat: 39, size: 18, name: '土耳其', code: 'tr', mode: 'etf' },
+    sa: { lon: 45, lat: 24, size: 20, name: '沙烏地', code: 'sa', mode: 'etf' },
+    il: { lon: 35, lat: 31, size: 10, name: '以色列', code: 'il', mode: 'etf' },
+    ae: { lon: 54, lat: 24, size: 10, name: '阿聯酋', code: 'ae', mode: 'etf' },
+
+    // ===== ETF 專用 - 非洲 =====
+    za: { lon: 25, lat: -29, size: 18, name: '南非', code: 'za', mode: 'etf' }
 };
 
 // Initialize amCharts Map
-am5.ready(function() {
+am5.ready(function () {
 
     // Create root element - 強制使用 SVG 渲染器
     root = am5.Root.new("chartdiv");
@@ -29,7 +178,7 @@ am5.ready(function() {
 
     // Set themes (none for clean look)
     root.setThemes([]);
-    
+
     // Create the map chart
     chart = root.container.children.push(
         am5map.MapChart.new(root, {
@@ -44,7 +193,7 @@ am5.ready(function() {
 
     // Add zoom control
     chart.set("zoomControl", am5map.ZoomControl.new(root, {}));
-    
+
     // Create polygon series for countries (exclude countries with color fills)
     var polygonSeries = chart.series.push(
         am5map.MapPolygonSeries.new(root, {
@@ -53,7 +202,7 @@ am5.ready(function() {
             // 排除：南極洲、美國、日本、台灣、香港、南韓、英國、德國、法國
         })
     );
-    
+
     // Default styling for all countries
     polygonSeries.mapPolygons.template.setAll({
         fill: am5.color(0xe8e8e8),
@@ -61,22 +210,26 @@ am5.ready(function() {
         strokeWidth: 1,
         interactive: false
     });
-    
+
     // 定義顏色 (全域變數供 stock-data.js 使用)
     upColor = 0xd32f2f;    // 紅色 (漲)
     downColor = 0x2e7d32;  // 綠色 (跌)
 
-    // 國家顏色配置（漲/跌）- 全域變數
-    countryColors = {
-        us: 0x999999,  // 預設灰色，等待真實數據
-        gb: 0x999999,
-        de: 0x999999,
-        fr: 0x999999,
-        kr: 0x999999,
-        jp: 0x999999,
-        hk: 0x999999,
-        tw: 0x999999
+    // 國家代碼 -> ISO 代碼映射
+    var countryToISO = {
+        us: 'US', gb: 'GB', de: 'DE', fr: 'FR', kr: 'KR', jp: 'JP', hk: 'HK', tw: 'TW',
+        ca: 'CA', br: 'BR', mx: 'MX', ar: 'AR', co: 'CO',
+        it: 'IT', es: 'ES', nl: 'NL', ch: 'CH', pl: 'PL', be: 'BE', se: 'SE', ie: 'IE', at: 'AT', no: 'NO', dk: 'DK',
+        cn: 'CN', in: 'IN', id: 'ID', sg: 'SG', th: 'TH', vn: 'VN', ph: 'PH', my: 'MY', au: 'AU',
+        tr: 'TR', sa: 'SA', il: 'IL', ae: 'AE',
+        za: 'ZA'
     };
+
+    // 國家顏色配置（漲/跌）- 全域變數，預設灰色
+    countryColors = {};
+    Object.keys(flagsConfig).forEach(function (code) {
+        countryColors[code] = 0x999999;  // 預設灰色
+    });
 
     // 通用函數：為指定國家創建顏色填充和國旗覆蓋層
     function createCountryWithFlag(code, isoCode) {
@@ -93,7 +246,7 @@ am5.ready(function() {
 
         series.mapPolygons.template.setAll({
             fill: am5.color(color),
-            fillOpacity: 0.3,
+            fillOpacity: 0,  // 無顏色填充，等有數據再顯示
             stroke: am5.color(0x999999),
             strokeWidth: 1,
             interactive: false
@@ -106,7 +259,7 @@ am5.ready(function() {
         flagSeries[code] = imageSeries;
 
         // 添加圓形國旗圖片
-        imageSeries.bullets.push(function(root, series, dataItem) {
+        imageSeries.bullets.push(function (root, series, dataItem) {
             var bullet = am5.Bullet.new(root, {
                 sprite: am5.Picture.new(root, {
                     width: config.size,
@@ -123,7 +276,7 @@ am5.ready(function() {
             flagSprites[code] = sprite;
 
             // 監聽拖曳
-            sprite.events.on("dragged", function(ev) {
+            sprite.events.on("dragged", function (ev) {
                 var geometry = dataItem.get("geometry");
                 if (geometry && geometry.coordinates) {
                     config.lon = geometry.coordinates[0];
@@ -137,7 +290,7 @@ am5.ready(function() {
             });
 
             // 點擊選中
-            sprite.events.on("click", function(ev) {
+            sprite.events.on("click", function (ev) {
                 selectFlagCountry(code);
             });
 
@@ -153,15 +306,22 @@ am5.ready(function() {
         console.log(`✅ ${config.name} - ${color === upColor ? '紅色 (漲)' : '綠色 (跌)'}`);
     }
 
-    // 為所有國家創建顏色填充和國旗覆蓋層
-    createCountryWithFlag('us', 'US');
-    createCountryWithFlag('gb', 'GB');
-    createCountryWithFlag('de', 'DE');
-    createCountryWithFlag('fr', 'FR');
-    createCountryWithFlag('kr', 'KR');
-    createCountryWithFlag('jp', 'JP');
-    createCountryWithFlag('hk', 'HK');
-    createCountryWithFlag('tw', 'TW');
+    // 動態創建所有國家的顏色填充和國旗覆蓋層
+    Object.keys(flagsConfig).forEach(function (code) {
+        var isoCode = countryToISO[code];
+        if (isoCode) {
+            createCountryWithFlag(code, isoCode);
+
+            // ETF 專用國家預設隱藏
+            var config = flagsConfig[code];
+            if (config.mode === 'etf') {
+                if (flagSeries[code]) flagSeries[code].hide();
+                if (countrySeries[code]) countrySeries[code].hide();
+            }
+        }
+    });
+
+    console.log(`🗺️ 共創建 ${Object.keys(flagsConfig).length} 個國家國旗`);
 
     // OLD CODE - TO BE REMOVED
     /*
@@ -458,7 +618,7 @@ am5.ready(function() {
         fill: am5.color(0xf5f5f5),
         fillOpacity: 1
     }));
-    
+
     chart.appear(0, 0);
     console.log('🗺️ amCharts 地圖已載入');
 
@@ -620,10 +780,10 @@ function setupFlagControls() {
     // 初始化顯示
     updateCoordsDisplay('us');
     updateSizeDisplay('us');
-    
+
     // 綁定所有控制按鈕
     document.querySelectorAll('.flag-control-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+        btn.addEventListener('click', function (e) {
             e.stopPropagation();
             e.preventDefault(); // 防止預設行為
 
@@ -640,7 +800,7 @@ function setupFlagControls() {
 
             const params = usFlagParams;
 
-            switch(dir) {
+            switch (dir) {
                 case 'up':
                     params.lat += step;
                     updateCoordsDisplay(country);
@@ -682,7 +842,7 @@ function setupFlagControls() {
             }
         });
     });
-    
+
     console.log('✅ 國旗控制按鈕已設置');
 }
 
@@ -828,7 +988,7 @@ class StockMarketMap {
     // Update stock data (simulated for demo)
     updateStockData() {
         const cards = document.querySelectorAll('.index-card');
-        
+
         cards.forEach(card => {
             const valueElement = card.querySelector('.index-value');
             if (valueElement) {
@@ -849,7 +1009,7 @@ class StockMarketMap {
     getMarketStatus(timezone) {
         const now = new Date();
         const hour = now.getHours();
-        
+
         // Simplified market hours check
         if (hour >= 9 && hour < 17) {
             return 'open';
@@ -859,9 +1019,9 @@ class StockMarketMap {
 
     // Format number with commas
     static formatNumber(num) {
-        return num.toLocaleString('zh-TW', { 
+        return num.toLocaleString('zh-TW', {
             minimumFractionDigits: 1,
-            maximumFractionDigits: 2 
+            maximumFractionDigits: 2
         });
     }
 
@@ -880,10 +1040,10 @@ class StockMarketMap {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     const app = new StockMarketMap();
-    
+
     // Add smooth scroll behavior
     document.documentElement.style.scrollBehavior = 'smooth';
-    
+
     // Log initialization
     console.log('🌍 全球股市指數地圖已載入');
 });
@@ -911,7 +1071,7 @@ function selectFlagCountry(code) {
     updateFlagAdjusterDisplay();
 
     // 視覺反饋：高亮選中的國旗
-    Object.keys(flagSprites).forEach(function(c) {
+    Object.keys(flagSprites).forEach(function (c) {
         var sprite = flagSprites[c];
         if (sprite) {
             sprite.set("opacity", c === code ? 1 : 0.5);
@@ -957,9 +1117,9 @@ function updateFlagOnMap() {
 // 方向鍵移動
 function moveFlagDirection(direction) {
     var config = flagsConfig[currentFlagCountry];
-    var step = 1;  // 每次移動 1 度
+    var step = 0.5;  // 每次移動 0.5 度
 
-    switch(direction) {
+    switch (direction) {
         case 'up':
             config.lat += step;
             break;
@@ -1026,9 +1186,9 @@ function copyFlagConfig() {
     var config = flagsConfig[currentFlagCountry];
     var text = `${currentFlagCountry}: { lon: ${config.lon.toFixed(1)}, lat: ${config.lat.toFixed(1)}, size: ${config.size} }`;
 
-    navigator.clipboard.writeText(text).then(function() {
+    navigator.clipboard.writeText(text).then(function () {
         showFlagToast(`已複製 ${config.name} 的參數！`);
-    }).catch(function(err) {
+    }).catch(function (err) {
         console.error('複製失敗:', err);
     });
 }
@@ -1037,7 +1197,7 @@ function copyFlagConfig() {
 function exportAllFlags() {
     var output = 'var flagsConfig = {\n';
 
-    Object.keys(flagsConfig).forEach(function(code, index, array) {
+    Object.keys(flagsConfig).forEach(function (code, index, array) {
         var config = flagsConfig[code];
         output += `    ${code}: { lon: ${config.lon.toFixed(1)}, lat: ${config.lat.toFixed(1)}, size: ${config.size} }`;
         if (index < array.length - 1) {
@@ -1048,9 +1208,9 @@ function exportAllFlags() {
 
     output += '};';
 
-    navigator.clipboard.writeText(output).then(function() {
+    navigator.clipboard.writeText(output).then(function () {
         showFlagToast('已複製所有配置！可以貼到程式碼中');
-    }).catch(function(err) {
+    }).catch(function (err) {
         console.error('複製失敗:', err);
     });
 }
@@ -1061,14 +1221,14 @@ function showFlagToast(message) {
     toast.textContent = message;
     toast.classList.add('show');
 
-    setTimeout(function() {
+    setTimeout(function () {
         toast.classList.remove('show');
     }, 2000);
 }
 
 // 面板拖曳功能
 (function setupPanelDrag() {
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         var panel = document.getElementById('flagAdjusterPanel');
         var header = document.getElementById('flagAdjusterHeader');
         if (!panel || !header) return;

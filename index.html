@@ -8,6 +8,9 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' style='filter: grayscale(100%);'>🌐</text></svg>">
     <link rel="stylesheet" href="styles.css">
     
+    <!-- Google Material Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    
     <!-- amCharts 5 Libraries -->
     <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
@@ -16,6 +19,18 @@
 <body>
     <!-- Logo -->
     <div class="logo">World Stock</div>
+
+    <!-- Floating Filter Tabs (Google Maps Style) -->
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-mode="stock" onclick="switchMode('stock')">
+            <span class="material-symbols-outlined">show_chart</span>
+            股市指數
+        </button>
+        <button class="filter-tab" data-mode="etf" onclick="switchMode('etf')">
+            <span class="material-symbols-outlined">public</span>
+            國家 ETF
+        </button>
+    </div>
 
     <!-- World Map Container -->
     <div class="map-container">
@@ -130,12 +145,19 @@
     </div>
 
     <!-- 浮動國旗調整面板 -->
-    <button class="flag-adjuster-toggle" id="flagAdjusterToggle" onclick="toggleFlagAdjuster()">🎯</button>
+    <button class="flag-adjuster-toggle" id="flagAdjusterToggle" onclick="toggleFlagAdjuster()">
+        <span class="material-symbols-outlined">tune</span>
+    </button>
 
     <div class="flag-adjuster-panel" id="flagAdjusterPanel">
         <div class="flag-adjuster-header" id="flagAdjusterHeader">
-            <span class="flag-adjuster-title">🎯 國旗位置調整</span>
-            <button class="flag-adjuster-close" onclick="toggleFlagAdjuster()">×</button>
+            <span class="flag-adjuster-title">
+                <span class="material-symbols-outlined">tune</span>
+                國旗位置調整
+            </span>
+            <button class="flag-adjuster-close" onclick="toggleFlagAdjuster()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
         </div>
 
         <div class="flag-adjuster-content">
@@ -143,14 +165,54 @@
             <div class="adjuster-section">
                 <label>選擇國家</label>
                 <select id="flagCountrySelect" onchange="selectFlagCountry(this.value)">
-                    <option value="us">🇺🇸 美國</option>
-                    <option value="gb">🇬🇧 英國</option>
-                    <option value="de">🇩🇪 德國</option>
-                    <option value="fr">🇫🇷 法國</option>
-                    <option value="kr">🇰🇷 南韓</option>
-                    <option value="jp">🇯🇵 日本</option>
-                    <option value="hk">🇭🇰 香港</option>
-                    <option value="tw">🇹🇼 台灣</option>
+                    <optgroup label="股市指數 + ETF">
+                        <option value="us">🇺🇸 美國</option>
+                        <option value="gb">🇬🇧 英國</option>
+                        <option value="de">🇩🇪 德國</option>
+                        <option value="fr">🇫🇷 法國</option>
+                        <option value="kr">🇰🇷 南韓</option>
+                        <option value="jp">🇯🇵 日本</option>
+                        <option value="hk">🇭🇰 香港</option>
+                        <option value="tw">🇹🇼 台灣</option>
+                    </optgroup>
+                    <optgroup label="美洲">
+                        <option value="ca">🇨🇦 加拿大</option>
+                        <option value="br">🇧🇷 巴西</option>
+                        <option value="mx">🇲🇽 墨西哥</option>
+                        <option value="ar">🇦🇷 阿根廷</option>
+                        <option value="co">🇨🇴 哥倫比亞</option>
+                    </optgroup>
+                    <optgroup label="歐洲">
+                        <option value="it">🇮🇹 義大利</option>
+                        <option value="es">🇪🇸 西班牙</option>
+                        <option value="nl">🇳🇱 荷蘭</option>
+                        <option value="ch">🇨🇭 瑞士</option>
+                        <option value="pl">🇵🇱 波蘭</option>
+                        <option value="be">🇧🇪 比利時</option>
+                        <option value="se">🇸🇪 瑞典</option>
+                        <option value="ie">🇮🇪 愛爾蘭</option>
+                        <option value="at">🇦🇹 奧地利</option>
+                        <option value="no">🇳🇴 挪威</option>
+                        <option value="dk">🇩🇰 丹麥</option>
+                    </optgroup>
+                    <optgroup label="亞太">
+                        <option value="cn">🇨🇳 中國</option>
+                        <option value="in">🇮🇳 印度</option>
+                        <option value="id">🇮🇩 印尼</option>
+                        <option value="sg">🇸🇬 新加坡</option>
+                        <option value="th">🇹🇭 泰國</option>
+                        <option value="vn">🇻🇳 越南</option>
+                        <option value="ph">🇵🇭 菲律賓</option>
+                        <option value="my">🇲🇾 馬來西亞</option>
+                        <option value="au">🇦🇺 澳洲</option>
+                    </optgroup>
+                    <optgroup label="中東/非洲">
+                        <option value="tr">🇹🇷 土耳其</option>
+                        <option value="sa">🇸🇦 沙烏地</option>
+                        <option value="il">🇮🇱 以色列</option>
+                        <option value="ae">🇦🇪 阿聯酋</option>
+                        <option value="za">🇿🇦 南非</option>
+                    </optgroup>
                 </select>
             </div>
 
@@ -159,13 +221,23 @@
                 <label>位置調整</label>
                 <div class="adjuster-direction-pad">
                     <div></div>
-                    <button class="adjuster-btn" onclick="moveFlagDirection('up')">↑</button>
+                    <button class="adjuster-btn" onclick="moveFlagDirection('up')">
+                        <span class="material-symbols-outlined">arrow_upward</span>
+                    </button>
                     <div></div>
-                    <button class="adjuster-btn" onclick="moveFlagDirection('left')">←</button>
-                    <button class="adjuster-btn center" onclick="resetFlagPosition()">⊙</button>
-                    <button class="adjuster-btn" onclick="moveFlagDirection('right')">→</button>
+                    <button class="adjuster-btn" onclick="moveFlagDirection('left')">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <button class="adjuster-btn center" onclick="resetFlagPosition()">
+                        <span class="material-symbols-outlined">filter_center_focus</span>
+                    </button>
+                    <button class="adjuster-btn" onclick="moveFlagDirection('right')">
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
                     <div></div>
-                    <button class="adjuster-btn" onclick="moveFlagDirection('down')">↓</button>
+                    <button class="adjuster-btn" onclick="moveFlagDirection('down')">
+                        <span class="material-symbols-outlined">arrow_downward</span>
+                    </button>
                     <div></div>
                 </div>
             </div>
@@ -190,8 +262,12 @@
                 <label>大小 (圓形直徑)</label>
                 <div class="adjuster-param">
                     <span>縮放</span>
-                    <button class="adjuster-btn-sm" onclick="adjustFlagSize(-10)">縮小</button>
-                    <button class="adjuster-btn-sm" onclick="adjustFlagSize(10)">放大</button>
+                    <button class="adjuster-btn-sm" onclick="adjustFlagSize(-10)">
+                        <span class="material-symbols-outlined">remove</span>
+                    </button>
+                    <button class="adjuster-btn-sm" onclick="adjustFlagSize(10)">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
                 </div>
                 <div class="adjuster-size-display">
                     直徑: <span id="adjusterSize">120</span> px
@@ -200,8 +276,14 @@
 
             <!-- 動作按鈕 -->
             <div class="adjuster-actions">
-                <button class="adjuster-action-btn primary" onclick="copyFlagConfig()">📋 複製當前</button>
-                <button class="adjuster-action-btn secondary" onclick="exportAllFlags()">💾 匯出全部</button>
+                <button class="adjuster-action-btn primary" onclick="copyFlagConfig()">
+                    <span class="material-symbols-outlined">content_copy</span>
+                    複製當前
+                </button>
+                <button class="adjuster-action-btn secondary" onclick="exportAllFlags()">
+                    <span class="material-symbols-outlined">download</span>
+                    匯出全部
+                </button>
             </div>
         </div>
     </div>
