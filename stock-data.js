@@ -573,6 +573,7 @@ class ETFUIUpdater {
             // 更新價格
             const priceEl = item.querySelector('.etf-price');
             if (priceEl && data.price) {
+                priceEl.classList.remove('skeleton');  // 移除骨架屏
                 priceEl.textContent = `$${this.dataManager.formatNumber(data.price, 2)}`;
             }
 
@@ -585,6 +586,7 @@ class ETFUIUpdater {
                 const arrow = change >= 0 ? '▲' : '▼';
                 const sign = change >= 0 ? '+' : '';
 
+                changeEl.classList.remove('skeleton');  // 移除骨架屏
                 changeEl.className = 'etf-change ' + direction;
                 changeEl.textContent = `${arrow}${sign}${changePercent.toFixed(2)}%`;
             }

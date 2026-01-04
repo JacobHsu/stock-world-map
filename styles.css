@@ -12,6 +12,29 @@ body {
     position: relative;
 }
 
+/* Material Icons 优化 - 防止字体加载延迟闪烁 */
+.material-symbols-outlined {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.2em;
+    height: 1.2em;
+    line-height: 1;
+    vertical-align: middle;
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* 字体加载前完全隐藏 */
+    opacity: 0;
+    transition: opacity 0.1s ease-in;
+}
+
+/* 字体加载完成后显示 - 使用 font-display: swap 会自动触发 */
+.material-symbols-outlined.loaded,
+body.fonts-loaded .material-symbols-outlined {
+    opacity: 1;
+}
+
 /* Logo */
 .logo {
     position: absolute;
@@ -470,7 +493,7 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 2000;
     transition: all 0.2s;
-    display: flex;
+    display: none;  /* 隐藏国旗位置调整浮球 */
     align-items: center;
     justify-content: center;
 }
@@ -870,7 +893,7 @@ body {
 }
 
 .etf-position-display {
-    display: block;  /* 顯示位置調整功能 */
+    display: none;  /* 隱藏位置調整功能 */
     font-size: 10px;
     color: #999;
     font-family: monospace;
