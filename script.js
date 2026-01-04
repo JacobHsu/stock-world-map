@@ -26,6 +26,15 @@ var etfModeCountries = [
     'za'
 ];
 
+// ETF 專用國家（不包含股市指數國家）
+var etfOnlyCountries = [
+    'ca', 'br', 'mx', 'ar', 'co',
+    'it', 'es', 'nl', 'ch', 'pl', 'be', 'se', 'ie', 'at', 'no', 'dk',
+    'cn', 'in', 'id', 'sg', 'th', 'vn', 'ph', 'my', 'au',
+    'tr', 'sa', 'il', 'ae',
+    'za'
+];
+
 // 模式切換函數
 function switchMode(mode) {
     if (currentMode === mode) return;
@@ -64,21 +73,43 @@ function showStockMode() {
 
     // 顯示股市國家的國旗和顏色
     stockModeCountries.forEach(code => {
+        console.log(`🔍 顯示股市國家: ${code}`);
+
         if (flagSeries[code]) {
-            flagSeries[code].show();
+            console.log(`  - 國旗系列存在: ${code}`);
+            flagSeries[code].set("visible", true);
+            console.log(`  - 國旗可見性已設為 true`);
+        } else {
+            console.log(`  ❌ 國旗系列不存在: ${code}`);
         }
+
         if (countrySeries[code]) {
-            countrySeries[code].show();
+            console.log(`  - 國家系列存在: ${code}`);
+            countrySeries[code].set("visible", true);
+            console.log(`  - 國家可見性已設為 true`);
+
+            // 重新應用儲存的顏色
+            if (countryColors[code]) {
+                console.log(`  - 重新應用顏色: ${countryColors[code].toString(16)}`);
+                countrySeries[code].mapPolygons.each(function (polygon) {
+                    polygon.set("fill", am5.color(countryColors[code]));
+                    polygon.set("fillOpacity", 0.6);
+                });
+            } else {
+                console.log(`  ⚠️ 沒有儲存的顏色: ${code}`);
+            }
+        } else {
+            console.log(`  ❌ 國家系列不存在: ${code}`);
         }
     });
 
-    // 隱藏 ETF 國家的國旗和顏色
-    etfModeCountries.forEach(code => {
+    // 隱藏 ETF 專用國家的國旗和顏色（不隱藏股市國家）
+    etfOnlyCountries.forEach(code => {
         if (flagSeries[code]) {
-            flagSeries[code].hide();
+            flagSeries[code].set("visible", false);
         }
         if (countrySeries[code]) {
-            countrySeries[code].hide();
+            countrySeries[code].set("visible", false);
         }
     });
 
@@ -97,23 +128,22 @@ function showETFMode() {
         card.style.display = 'block';
     });
 
-    // 隱藏股市國家的國旗和顏色
+    // 隱藏股市國家的國旗和顏色（清除股市模式的著色）
     stockModeCountries.forEach(code => {
-        if (flagSeries[code]) {
-            flagSeries[code].hide();
-        }
         if (countrySeries[code]) {
-            countrySeries[code].hide();
+            countrySeries[code].mapPolygons.each(function (polygon) {
+                polygon.set("fillOpacity", 0);  // 移除著色但保持可見
+            });
         }
     });
 
-    // 顯示 ETF 國家的國旗和顏色
-    etfModeCountries.forEach(code => {
+    // 顯示 ETF 專用國家的國旗和顏色
+    etfOnlyCountries.forEach(code => {
         if (flagSeries[code]) {
-            flagSeries[code].show();
+            flagSeries[code].set("visible", true);
         }
         if (countrySeries[code]) {
-            countrySeries[code].show();
+            countrySeries[code].set("visible", true);
         }
     });
 
@@ -325,8 +355,8 @@ am5.ready(function () {
             // ETF 專用國家預設隱藏
             var config = flagsConfig[code];
             if (config.mode === 'etf') {
-                if (flagSeries[code]) flagSeries[code].hide();
-                if (countrySeries[code]) countrySeries[code].hide();
+                if (flagSeries[code]) flagSeries[code].set("visible", false);
+                if (countrySeries[code]) countrySeries[code].set("visible", false);
             }
         }
     });

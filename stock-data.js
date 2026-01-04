@@ -412,16 +412,17 @@ class StockUIUpdater {
         if (typeof countryColors === 'undefined' || typeof countrySeries === 'undefined' || typeof am5 === 'undefined') {
             return;
         }
-        
+
         const upColor = 0xd32f2f;    // 紅色 (漲)
         const downColor = 0x2e7d32;  // 綠色 (跌)
         const newColor = direction === 'up' ? upColor : downColor;
-        
+
         countryColors[countryCode] = newColor;
-        
+
         if (countrySeries[countryCode]) {
             countrySeries[countryCode].mapPolygons.each(function(polygon) {
                 polygon.set("fill", am5.color(newColor));
+                polygon.set("fillOpacity", 0.6);
             });
             console.log(`🗺️ ${countryCode} 地圖顏色更新: ${direction === 'up' ? '紅色(漲)' : '綠色(跌)'}`);
         }
