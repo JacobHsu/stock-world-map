@@ -147,6 +147,13 @@ function showETFMode() {
         }
     });
 
+    // 初始化並獲取 ETF 數據
+    if (typeof initETFData === 'function') {
+        initETFData().catch(err => {
+            console.error('❌ ETF 數據初始化失敗:', err);
+        });
+    }
+
     console.log('📈 ETF 模式已啟用');
 }
 

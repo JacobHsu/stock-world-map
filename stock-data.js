@@ -113,11 +113,11 @@ class StockDataManager {
         for (const proxyIndex of proxyOrder) {
             const proxy = CORS_PROXIES[proxyIndex];
             const fullUrl = proxy.url + encodeURIComponent(url);
-            
+
             try {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超時
-                
+
                 const response = await fetch(fullUrl, {
                     method: 'GET',
                     signal: controller.signal,
@@ -125,9 +125,9 @@ class StockDataManager {
                         'Accept': 'application/json'
                     }
                 });
-                
+
                 clearTimeout(timeoutId);
-                
+
                 if (response.ok) {
                     const text = await response.text();
                     try {
@@ -152,7 +152,7 @@ class StockDataManager {
                 continue;
             }
         }
-        
+
         throw new Error('所有 CORS proxy 都失敗了');
     }
 
@@ -161,19 +161,19 @@ class StockDataManager {
      */
     async fetchQuote(symbol) {
         const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=2d`;
-        
+
         try {
             const data = await this.fetchWithProxy(yahooUrl);
-            
+
             if (data.chart && data.chart.result && data.chart.result[0]) {
                 const result = data.chart.result[0];
                 const meta = result.meta;
-                
+
                 const currentPrice = meta.regularMarketPrice || meta.previousClose;
                 const previousClose = meta.chartPreviousClose || meta.previousClose;
                 const change = currentPrice - previousClose;
                 const changePercent = previousClose ? (change / previousClose) * 100 : 0;
-                
+
                 return {
                     symbol: symbol,
                     price: currentPrice,
@@ -186,7 +186,7 @@ class StockDataManager {
                     regularMarketTime: meta.regularMarketTime ? new Date(meta.regularMarketTime * 1000) : new Date()
                 };
             }
-            
+
             return null;
         } catch (error) {
             console.warn(`⚠️ 獲取 ${symbol} 數據失敗:`, error.message);
@@ -208,7 +208,7 @@ class StockDataManager {
         console.log('🔄 開始並行獲取股市數據...');
 
         const results = {};
-        
+
         // 初始化結果物件
         for (const countryCode of Object.keys(STOCK_INDICES)) {
             results[countryCode] = { main: null, sub: [] };
@@ -219,7 +219,7 @@ class StockDataManager {
             try {
                 const mainData = await this.fetchQuote(config.symbol);
                 results[countryCode].main = mainData;
-                
+
                 if (mainData) {
                     console.log(`📈 ${config.name}: ${mainData.price?.toFixed(2)} (${mainData.changePercent?.toFixed(2)}%)`);
                 }
@@ -234,11 +234,11 @@ class StockDataManager {
         this.cache = results;
         this.lastUpdate = new Date();
         this.isUpdating = false;
-        
+
         const successCount = Object.values(results).filter(r => r.main !== null).length;
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
         console.log(`✅ 股市數據獲取完成 (${successCount}/${Object.keys(STOCK_INDICES).length}) - ${elapsed}秒`);
-        
+
         return results;
     }
 
@@ -291,7 +291,7 @@ class StockUIUpdater {
     createCardMapping() {
         const cards = document.querySelectorAll('.index-card');
         const mapping = {};
-        
+
         const countryPatterns = {
             '/us.': 'us', 'us.png': 'us',
             '/gb.': 'gb', 'gb.png': 'gb',
@@ -302,7 +302,7 @@ class StockUIUpdater {
             '/hk.': 'hk', 'hk.png': 'hk',
             '/tw.': 'tw', 'tw.png': 'tw'
         };
-        
+
         cards.forEach(card => {
             const flagImg = card.querySelector('.flag');
             if (flagImg) {
@@ -316,7 +316,7 @@ class StockUIUpdater {
                 }
             }
         });
-        
+
         console.log('📋 卡片映射:', Object.keys(mapping));
         return mapping;
     }
@@ -342,17 +342,17 @@ class StockUIUpdater {
             const config = STOCK_INDICES[countryCode];
             const timeNote = config?.timeNote || '';
             const holiday = config?.holiday || null;
-            
+
             // 組合狀態文字
             let statusHTML = status.text;
-            
+
             // 如果有休市資訊且市場已收盤，優先顯示
             if (holiday && status.class === 'closed') {
                 statusHTML = `<span class="holiday-note">📅 ${holiday}</span>`;
             } else if (timeNote && status.class === 'closed') {
                 statusHTML = `${status.text} <span class="time-note">${timeNote}</span>`;
             }
-            
+
             statusEl.innerHTML = statusHTML;
             statusEl.className = 'status ' + status.class;
         }
@@ -365,7 +365,7 @@ class StockUIUpdater {
             const direction = change >= 0 ? 'up' : 'down';
             const arrow = change >= 0 ? '▲' : '▼';
             const sign = change >= 0 ? '+' : '';
-            
+
             valueEl.className = 'index-value ' + direction;
             valueEl.innerHTML = `
                 ${this.dataManager.formatNumber(mainData.price, 1)} 
@@ -385,13 +385,13 @@ class StockUIUpdater {
                         </div>
                     `;
                 }
-                
+
                 const change = sub.data.change || 0;
                 const changePercent = sub.data.changePercent || 0;
                 const direction = change >= 0 ? 'up' : 'down';
                 const arrow = change >= 0 ? '▲' : '▼';
                 const sign = change >= 0 ? '+' : '';
-                
+
                 return `
                     <div class="sub-index">
                         <span class="sub-name">${sub.name}</span>
@@ -399,7 +399,7 @@ class StockUIUpdater {
                     </div>
                 `;
             }).join('');
-            
+
             subIndicesContainer.innerHTML = subHTML;
         }
 
@@ -420,7 +420,7 @@ class StockUIUpdater {
         countryColors[countryCode] = newColor;
 
         if (countrySeries[countryCode]) {
-            countrySeries[countryCode].mapPolygons.each(function(polygon) {
+            countrySeries[countryCode].mapPolygons.each(function (polygon) {
                 polygon.set("fill", am5.color(newColor));
                 polygon.set("fillOpacity", 0.6);
             });
@@ -431,16 +431,199 @@ class StockUIUpdater {
     async updateAllCards() {
         try {
             const data = await this.dataManager.fetchAllIndices();
-            
+
             for (const [countryCode, indexData] of Object.entries(data)) {
                 this.updateCard(countryCode, indexData);
             }
-            
+
             const now = new Date();
             console.log(`🕐 數據更新時間: ${now.toLocaleTimeString('zh-TW')}`);
-            
+
         } catch (error) {
             console.error('❌ 更新卡片失敗:', error);
+        }
+    }
+}
+
+/**
+ * ETF 數據管理類
+ */
+class ETFDataManager extends StockDataManager {
+    constructor() {
+        super();
+        this.etfCache = {};
+    }
+
+    /**
+     * 批量獲取所有 ETF 數據 - 使用 Yahoo Finance 批量端點優化
+     */
+    async fetchAllETFs() {
+        if (this.isUpdating) {
+            console.log('⏳ ETF 數據更新中，跳過本次請求');
+            return this.etfCache;
+        }
+
+        this.isUpdating = true;
+        const startTime = Date.now();
+        console.log('🔄 開始並行獲取 ETF 數據...');
+
+        const results = {};
+        const countryAggregation = {};
+
+        // 初始化國家聚合物件
+        ETF_CONFIG.etfs.forEach(etf => {
+            if (!countryAggregation[etf.country]) {
+                countryAggregation[etf.country] = {
+                    etfs: [],
+                    changes: [],
+                    avgChange: 0
+                };
+            }
+        });
+
+
+        // 並行獲取所有 ETF
+        const fetchPromises = ETF_CONFIG.etfs.map(async (etfConfig) => {
+            try {
+                const data = await this.fetchQuote(etfConfig.symbol);
+                results[etfConfig.symbol] = {
+                    config: etfConfig,
+                    data: data
+                };
+
+                if (data && data.changePercent !== undefined) {
+                    countryAggregation[etfConfig.country].etfs.push(etfConfig.symbol);
+                    countryAggregation[etfConfig.country].changes.push(data.changePercent);
+                    console.log(`📊 ${etfConfig.symbol} (${etfConfig.countryName}): ${data.price?.toFixed(2)} (${data.changePercent?.toFixed(2)}%)`);
+                }
+            } catch (error) {
+                console.warn(`⚠️ ${etfConfig.symbol} 獲取失敗`);
+                results[etfConfig.symbol] = {
+                    config: etfConfig,
+                    data: null
+                };
+            }
+        });
+
+        // 等待所有請求完成
+        await Promise.all(fetchPromises);
+
+
+        // 計算每個國家的平均漲跌幅
+        Object.keys(countryAggregation).forEach(countryCode => {
+            const agg = countryAggregation[countryCode];
+            if (agg.changes.length > 0) {
+                agg.avgChange = agg.changes.reduce((sum, val) => sum + val, 0) / agg.changes.length;
+            }
+        });
+
+        this.etfCache = {
+            etfs: results,
+            countries: countryAggregation
+        };
+        this.lastUpdate = new Date();
+        this.isUpdating = false;
+
+        const successCount = Object.values(results).filter(r => r.data !== null).length;
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        console.log(`✅ ETF 數據獲取完成 (${successCount}/${ETF_CONFIG.etfs.length}) - ${elapsed}秒`);
+
+        return this.etfCache;
+    }
+}
+
+/**
+ * ETF UI 更新類
+ */
+class ETFUIUpdater {
+    constructor(dataManager) {
+        this.dataManager = dataManager;
+        this.etfMapping = this.createETFMapping();
+    }
+
+    createETFMapping() {
+        const etfItems = document.querySelectorAll('.etf-item');
+        const mapping = {};
+
+        etfItems.forEach(item => {
+            const symbolEl = item.querySelector('.etf-symbol');
+            if (symbolEl) {
+                const symbol = symbolEl.textContent.trim();
+                mapping[symbol] = item;
+            }
+        });
+
+        console.log(`📋 ETF 卡片映射: ${Object.keys(mapping).length} 個`);
+        return mapping;
+    }
+
+    updateETFItem(symbol, data) {
+        const item = this.etfMapping[symbol];
+        if (!item || !data) {
+            return;
+        }
+
+        // 更新價格
+        const priceEl = item.querySelector('.etf-price');
+        if (priceEl && data.price) {
+            priceEl.textContent = `$${this.dataManager.formatNumber(data.price, 2)}`;
+        }
+
+        // 更新漲跌
+        const changeEl = item.querySelector('.etf-change');
+        if (changeEl && data.changePercent !== undefined) {
+            const change = data.change || 0;
+            const changePercent = data.changePercent || 0;
+            const direction = change >= 0 ? 'up' : 'down';
+            const arrow = change >= 0 ? '▲' : '▼';
+            const sign = change >= 0 ? '+' : '';
+
+            changeEl.className = 'etf-change ' + direction;
+            changeEl.textContent = `${arrow}${sign}${changePercent.toFixed(2)}%`;
+        }
+    }
+
+    updateCountryETFColor(countryCode, avgChange) {
+        // 確保全域變數存在
+        if (typeof countrySeries === 'undefined' || typeof am5 === 'undefined') {
+            return;
+        }
+
+        // 美國市場慣例：綠色上漲、紅色下跌
+        const upColor = 0x2e7d32;    // 綠色 (漲)
+        const downColor = 0xd32f2f;  // 紅色 (跌)
+        const newColor = avgChange >= 0 ? upColor : downColor;
+
+        if (countrySeries[countryCode]) {
+            countrySeries[countryCode].mapPolygons.each(function (polygon) {
+                polygon.set("fill", am5.color(newColor));
+                polygon.set("fillOpacity", 0.6);
+            });
+            console.log(`🗺️ ${countryCode} ETF 地圖顏色更新: ${avgChange >= 0 ? '綠色(漲)' : '紅色(跌)'} (平均 ${avgChange.toFixed(2)}%)`);
+        }
+    }
+
+    async updateAllETFs() {
+        try {
+            const data = await this.dataManager.fetchAllETFs();
+
+            // 更新所有 ETF 卡片
+            Object.entries(data.etfs).forEach(([symbol, etfData]) => {
+                this.updateETFItem(symbol, etfData.data);
+            });
+
+            // 更新地圖顏色（按國家平均）
+            Object.entries(data.countries).forEach(([countryCode, countryData]) => {
+                if (countryData.changes.length > 0) {
+                    this.updateCountryETFColor(countryCode, countryData.avgChange);
+                }
+            });
+
+            const now = new Date();
+            console.log(`🕐 ETF 數據更新時間: ${now.toLocaleTimeString('zh-TW')}`);
+
+        } catch (error) {
+            console.error('❌ 更新 ETF 卡片失敗:', error);
         }
     }
 }
@@ -449,25 +632,40 @@ class StockUIUpdater {
 
 let stockDataManager;
 let stockUIUpdater;
+let etfDataManager;
+let etfUIUpdater;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     setTimeout(initStockData, 500);  // 快速啟動
 });
 
 async function initStockData() {
     console.log('📊 初始化股市數據系統...');
-    
+
     stockDataManager = new StockDataManager();
     stockUIUpdater = new StockUIUpdater(stockDataManager);
-    
+
     await stockUIUpdater.updateAllCards();
-    
+
     setInterval(async () => {
         console.log('⏰ 定時更新股市數據...');
         await stockUIUpdater.updateAllCards();
     }, 60000);
-    
+
     console.log('✅ 股市數據系統初始化完成');
+}
+
+async function initETFData() {
+    console.log('📈 初始化 ETF 數據系統...');
+
+    if (!etfDataManager) {
+        etfDataManager = new ETFDataManager();
+        etfUIUpdater = new ETFUIUpdater(etfDataManager);
+    }
+
+    await etfUIUpdater.updateAllETFs();
+
+    console.log('✅ ETF 數據系統初始化完成');
 }
 
 async function refreshStockData() {
@@ -477,6 +675,17 @@ async function refreshStockData() {
     }
 }
 
+async function refreshETFData() {
+    if (etfUIUpdater) {
+        console.log('🔄 手動刷新 ETF 數據...');
+        await etfUIUpdater.updateAllETFs();
+    }
+}
+
 window.refreshStockData = refreshStockData;
+window.refreshETFData = refreshETFData;
+window.initETFData = initETFData;
 window.StockDataManager = StockDataManager;
 window.StockUIUpdater = StockUIUpdater;
+window.ETFDataManager = ETFDataManager;
+window.ETFUIUpdater = ETFUIUpdater;

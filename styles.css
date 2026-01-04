@@ -870,6 +870,7 @@ body {
 }
 
 .etf-position-display {
+    display: none;  /* 隱藏所有位置顯示功能 */
     font-size: 10px;
     color: #999;
     font-family: monospace;
@@ -927,9 +928,9 @@ body {
 
 .etf-symbol {
     width: 50px;
-    font-size: 12px;
-    color: #666;
-    font-weight: 600;
+    font-size: 16px;  /* 放大字體，成為視覺焦點 */
+    color: #1a73e8;  /* 藍色強調 */
+    font-weight: 700;  /* 加粗 */
     font-family: monospace;
     flex-shrink: 0;
 }
@@ -951,12 +952,13 @@ body {
     flex-shrink: 0;
 }
 
+/* 美國市場慣例：綠色上漲、紅色下跌 */
 .etf-change.up {
-    color: #d32f2f;
+    color: #2e7d32;  /* 綠色 (漲) */
 }
 
 .etf-change.down {
-    color: #2e7d32;
+    color: #d32f2f;  /* 紅色 (跌) */
 }
 
 .etf-change.neutral {

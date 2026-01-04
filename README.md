@@ -1,9 +1,9 @@
 # 🌐 World Stock - 全球股市指數地圖
 
-一個互動式的全球股市指數地圖應用程式，使用 amCharts 5 在世界地圖上即時顯示主要股市指數數據，並根據漲跌幅動態改變國家顏色。
+一個互動式的全球股市指數地圖應用程式，使用 amCharts 5 在世界地圖上即時顯示主要股市指數與國家 ETF 數據，並根據漲跌幅動態改變國家顏色。
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
+![Version](https://img.shields.io/badge/version-2.0.0-green.svg)
 
 ## 📸 功能預覽
 
@@ -11,12 +11,15 @@
 
 - 🗺️ **互動式世界地圖** - 使用 amCharts 5 渲染的高品質 SVG 地圖
 - 📈 **即時股市數據** - 透過 Yahoo Finance API 獲取即時股市指數
-- 🎨 **動態顏色顯示** - 國家顏色根據股市漲跌自動變化（紅漲綠跌）
+- 🌍 **國家 ETF 模式** - 支援 40 個國家/地區的 ETF 即時報價（美國慣例：綠漲紅跌）
+- 🎨 **動態顏色顯示** - 國家顏色根據股市漲跌自動變化
 - 🚩 **圓形國旗標記** - 在地圖上顯示各國圓形國旗圖示
 - 📋 **可拖曳資訊卡** - 可自由拖曳定位的股市資訊卡片
-- 🎯 **國旗位置調整器** - 精準調整地圖上國旗位置與大小
+- 🔄 **雙模式切換** - 股市指數（8國）與國家 ETF（40國）快速切換
 
 ## 🌍 支援市場
+
+### 股市指數模式（8 國）
 
 | 國家/地區 | 指數名稱 | 代號 | 交易時段 (台北時間) |
 |:---------:|:--------:|:----:|:-------------------:|
@@ -28,6 +31,22 @@
 | 🇯🇵 日本 | 日經 225 | ^N225 | 08:00-14:00 |
 | 🇭🇰 香港 | 恆生指數 | ^HSI | 09:30-16:00 |
 | 🇹🇼 台灣 | 加權指數 | ^TWII | 09:00-13:30 |
+
+### 國家 ETF 模式（40 國）
+
+| 區域 | 國家/ETF |
+|:----:|:---------|
+| **北美** | 🇺🇸 VTI, VUG, VTV / 🇨🇦 EWC |
+| **南美** | 🇧🇷 EWZ / 🇲🇽 EWW / 🇦🇷 ARGT / 🇨🇴 ICOL |
+| **西歐** | 🇬🇧 EWU / 🇩🇪 EWG / 🇫🇷 EWQ / 🇮🇹 EWI / 🇪🇸 EWP / 🇳🇱 EWN / 🇨🇭 EWL |
+| **北歐** | 🇸🇪 EWD / 🇳🇴 NORW / 🇩🇰 EDEN |
+| **中東歐** | 🇵🇱 EPOL / 🇧🇪 EWK / 🇮🇪 EIRL / 🇦🇹 EWO |
+| **東亞** | 🇯🇵 EWJ / 🇰🇷 EWY / 🇭🇰 EWH / 🇹🇼 EWT / 🇨🇳 CNYA |
+| **東南亞** | 🇸🇬 EWS / 🇮🇩 EIDO / 🇹🇭 THD / 🇻🇳 VNM / 🇵🇭 EPHE / 🇲🇾 EWM |
+| **南亞** | 🇮🇳 INDA |
+| **大洋洲** | 🇦🇺 EWA |
+| **中東** | 🇹🇷 TUR / 🇸🇦 KSA / 🇮🇱 EIS / 🇦🇪 UAE |
+| **非洲** | 🇿🇦 EZA |
 
 ## 🚀 快速開始
 
@@ -67,6 +86,7 @@ stock-world-map/
 ├── styles.css           # 樣式表
 ├── script.js            # 地圖與 UI 邏輯
 ├── stock-data.js        # 股市數據獲取模組
+├── etf-config.js        # ETF 配置檔案（40 國 ETF 列表）
 ├── flag-controls.html   # 國旗調整工具頁面
 └── README.md            # 專案說明文件
 ```
@@ -169,12 +189,16 @@ https://query1.finance.yahoo.com/v8/finance/chart/^DJI?interval=1d&range=2d
 
 ### 修改國家顏色
 
-編輯 `script.js` 中的顏色配置：
+編輯 `stock-data.js` 中的顏色配置：
 
 ```javascript
-// 漲/跌顏色設定
+// 股市指數模式（台灣慣例）
 upColor = 0xd32f2f;    // 紅色 (漲)
 downColor = 0x2e7d32;  // 綠色 (跌)
+
+// ETF 模式（美國慣例）
+upColor = 0x2e7d32;    // 綠色 (漲)
+downColor = 0xd32f2f;  // 紅色 (跌)
 ```
 
 ### 調整國旗位置
