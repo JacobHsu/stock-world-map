@@ -828,3 +828,137 @@ body {
 .flag-toast.show {
     opacity: 1;
 }
+
+/* ==================== ETF 資訊卡（按洲分組） ==================== */
+
+.etf-card {
+    position: absolute;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    z-index: 10;
+    cursor: move;
+    transition: all 0.3s ease;
+    display: none; /* 預設隱藏，ETF 模式才顯示 */
+}
+
+.etf-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.etf-card.dragging {
+    opacity: 0.8;
+    cursor: grabbing;
+    z-index: 1000;
+}
+
+.etf-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.etf-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+}
+
+.etf-position-display {
+    font-size: 10px;
+    color: #999;
+    font-family: monospace;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.etf-position-display:hover {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.etf-position-display:active {
+    background: #1a73e8;
+    color: white;
+}
+
+.etf-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* ETF 單行項目（橫向一排） */
+.etf-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.etf-item:hover {
+    background: #f5f5f5;
+}
+
+.etf-flag {
+    width: 24px;
+    height: auto;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.etf-country {
+    width: 50px;
+    font-size: 12px;
+    color: #333;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.etf-symbol {
+    width: 50px;
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+    font-family: monospace;
+    flex-shrink: 0;
+}
+
+.etf-price {
+    width: 60px;
+    font-size: 13px;
+    color: #333;
+    font-weight: 600;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.etf-change {
+    width: 70px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.etf-change.up {
+    color: #d32f2f;
+}
+
+.etf-change.down {
+    color: #2e7d32;
+}
+
+.etf-change.neutral {
+    color: #999;
+}

@@ -57,6 +57,11 @@ function showStockMode() {
         card.style.display = 'block';
     });
 
+    // 隱藏所有 ETF 卡片
+    document.querySelectorAll('.etf-card').forEach(card => {
+        card.style.display = 'none';
+    });
+
     // 顯示股市國家的國旗和顏色
     stockModeCountries.forEach(code => {
         if (flagSeries[code]) {
@@ -87,6 +92,11 @@ function showETFMode() {
         card.style.display = 'none';
     });
 
+    // 顯示所有 ETF 卡片
+    document.querySelectorAll('.etf-card').forEach(card => {
+        card.style.display = 'block';
+    });
+
     // 隱藏股市國家的國旗和顏色
     stockModeCountries.forEach(code => {
         if (flagSeries[code]) {
@@ -97,7 +107,7 @@ function showETFMode() {
         }
     });
 
-    // 顯示 ETF 國家的國旗和顏色（目前尚未建立）
+    // 顯示 ETF 國家的國旗和顏色
     etfModeCountries.forEach(code => {
         if (flagSeries[code]) {
             flagSeries[code].show();
@@ -107,7 +117,7 @@ function showETFMode() {
         }
     });
 
-    console.log('📈 ETF 模式已啟用 (地圖已清空，等待新增 ETF 國家)');
+    console.log('📈 ETF 模式已啟用');
 }
 
 // 暴露到全域
@@ -140,7 +150,7 @@ var flagsConfig = {
     ch: { lon: 8.2, lat: 46.8, size: 10, name: '瑞士', code: 'ch', mode: 'etf' },
     pl: { lon: 19.1, lat: 51.9, size: 20, name: '波蘭', code: 'pl', mode: 'etf' },
     be: { lon: 4.4, lat: 50.8, size: 8, name: '比利時', code: 'be', mode: 'etf' },
-    se: { lon: 18.6, lat: 60.1, size: 20, name: '瑞典', code: 'se', mode: 'etf' },
+    se: { lon: 15.1, lat: 60.1, size: 20, name: '瑞典', code: 'se', mode: 'etf' },
     ie: { lon: -8, lat: 53.4, size: 10, name: '愛爾蘭', code: 'ie', mode: 'etf' },
     at: { lon: 14.6, lat: 47.5, size: 10, name: '奧地利', code: 'at', mode: 'etf' },
     no: { lon: 8.5, lat: 60.5, size: 20, name: '挪威', code: 'no', mode: 'etf' },
@@ -862,7 +872,7 @@ class StockMarketMap {
     }
 
     setupEventListeners() {
-        // Card hover effects
+        // Card hover effects (股市指數卡片)
         const cards = document.querySelectorAll('.index-card');
         cards.forEach(card => {
             card.addEventListener('mouseenter', this.onCardHover.bind(this));
@@ -872,13 +882,21 @@ class StockMarketMap {
             card.addEventListener('mousedown', this.onDragStart.bind(this));
         });
 
+        // ETF 卡片拖拽功能
+        const etfCards = document.querySelectorAll('.etf-card');
+        etfCards.forEach(card => {
+            card.addEventListener('mouseenter', this.onCardHover.bind(this));
+            card.addEventListener('mouseleave', this.onCardLeave.bind(this));
+            card.addEventListener('mousedown', this.onDragStart.bind(this));
+        });
+
         // Global mouse events for dragging
         document.addEventListener('mousemove', this.onDrag.bind(this));
         document.addEventListener('mouseup', this.onDragEnd.bind(this));
     }
 
     addPositionDisplays() {
-        // Add position display to each card
+        // Add position display to each card (股市指數卡片)
         const cards = document.querySelectorAll('.index-card');
         cards.forEach(card => {
             const posDisplay = document.createElement('div');
@@ -908,6 +926,52 @@ class StockMarketMap {
             card.appendChild(posDisplay);
             this.updatePositionDisplay(card);
         });
+
+        // Add position display to ETF cards
+        this.addETFPositionDisplays();
+    }
+
+    addETFPositionDisplays() {
+        const etfCards = document.querySelectorAll('.etf-card');
+        etfCards.forEach(card => {
+            const posDisplay = card.querySelector('.etf-position-display');
+            if (!posDisplay) return;
+
+            // Update position display
+            this.updateETFPositionDisplay(card);
+
+            // Click to copy position
+            posDisplay.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const left = card.style.left || '0%';
+                const top = card.style.top || '0%';
+                const cardName = card.querySelector('.etf-card-title')?.textContent || 'ETF Card';
+                const copyText = `${cardName}: left: ${left}; top: ${top}`;
+
+                navigator.clipboard.writeText(copyText).then(() => {
+                    // Visual feedback
+                    const originalText = posDisplay.textContent;
+                    posDisplay.textContent = '✓ 已複製';
+                    posDisplay.style.background = '#4CAF50';
+                    posDisplay.style.color = 'white';
+                    setTimeout(() => {
+                        posDisplay.style.background = '';
+                        posDisplay.style.color = '';
+                        this.updateETFPositionDisplay(card);
+                    }, 1000);
+                    console.log(`📋 已複製: ${copyText}`);
+                });
+            });
+        });
+    }
+
+    updateETFPositionDisplay(card) {
+        const posDisplay = card.querySelector('.etf-position-display');
+        if (posDisplay) {
+            const left = card.style.left || '0%';
+            const top = card.style.top || '0%';
+            posDisplay.textContent = `${left}, ${top}`;
+        }
     }
 
     updatePositionDisplay(card) {
@@ -964,8 +1028,17 @@ class StockMarketMap {
             // Log final position for easy copying
             const left = this.draggedCard.style.left;
             const top = this.draggedCard.style.top;
-            const cardName = this.draggedCard.querySelector('.index-name')?.textContent || 'Card';
-            console.log(`📍 ${cardName}: left: ${left}; top: ${top}`);
+
+            // Update position display
+            if (this.draggedCard.classList.contains('etf-card')) {
+                const cardName = this.draggedCard.querySelector('.etf-card-title')?.textContent || 'ETF Card';
+                console.log(`📍 ${cardName}: left: ${left}; top: ${top}`);
+                this.updateETFPositionDisplay(this.draggedCard);
+            } else {
+                const cardName = this.draggedCard.querySelector('.index-name')?.textContent || 'Card';
+                console.log(`📍 ${cardName}: left: ${left}; top: ${top}`);
+                this.updatePositionDisplay(this.draggedCard);
+            }
 
             this.draggedCard = null;
         }
