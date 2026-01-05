@@ -247,15 +247,60 @@ class StockDataManager {
     }
 
     getMarketStatus(countryCode, marketState) {
+        // 先使用 API 返回的狀態
         if (marketState === 'REGULAR') {
             return { text: '交易中', class: 'open' };
         } else if (marketState === 'PRE') {
             return { text: '盤前', class: 'pre' };
         } else if (marketState === 'POST') {
             return { text: '盤後', class: 'post' };
-        } else {
+        }
+
+        // 如果 API 返回 CLOSED，使用本地時間判斷（台灣時區 UTC+8）
+        const now = new Date();
+        const taipeiTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Taipei' }));
+        const hour = taipeiTime.getHours();
+        const minute = taipeiTime.getMinutes();
+        const timeInMinutes = hour * 60 + minute;
+
+        const config = STOCK_INDICES[countryCode];
+        if (!config) {
             return { text: '已收盤', class: 'closed' };
         }
+
+        // 根據不同市場的開盤時間判斷（台北時間）
+        let isOpen = false;
+        switch (countryCode) {
+            case 'tw':
+                // 台灣: 09:00-13:30
+                isOpen = (timeInMinutes >= 9 * 60) && (timeInMinutes < 13 * 60 + 30);
+                break;
+            case 'kr':
+                // 韓國: 08:00-14:30 (台北時間，韓國比台灣快1小時，所以韓國9:00 = 台北8:00)
+                isOpen = (timeInMinutes >= 8 * 60) && (timeInMinutes < 14 * 60 + 30);
+                break;
+            case 'jp':
+                // 日本: 08:00-14:00 (台北時間)
+                isOpen = (timeInMinutes >= 8 * 60) && (timeInMinutes < 14 * 60);
+                break;
+            case 'hk':
+                // 香港: 09:30-16:00
+                isOpen = (timeInMinutes >= 9 * 60 + 30) && (timeInMinutes < 16 * 60);
+                break;
+            case 'cn':
+                // 中國: 09:30-15:00
+                isOpen = (timeInMinutes >= 9 * 60 + 30) && (timeInMinutes < 15 * 60);
+                break;
+            default:
+                // 其他市場依賴 API 狀態
+                break;
+        }
+
+        if (isOpen) {
+            return { text: '交易中', class: 'open' };
+        }
+
+        return { text: '已收盤', class: 'closed' };
     }
 
     formatNumber(num, decimals = 1) {
