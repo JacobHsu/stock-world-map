@@ -493,7 +493,7 @@ body.fonts-loaded .material-symbols-outlined {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 2000;
     transition: all 0.2s;
-    display: none;  /* 隐藏国旗位置调整浮球 */
+    display: none;  /* 隱藏國旗位置調整浮球 */
     align-items: center;
     justify-content: center;
 }
@@ -858,7 +858,7 @@ body.fonts-loaded .material-symbols-outlined {
     position: absolute;
     background: #ffffff;
     border-radius: 8px;
-    padding: 12px;
+    padding: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border: 1px solid #e0e0e0;
     z-index: 10;
@@ -881,8 +881,8 @@ body.fonts-loaded .material-symbols-outlined {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
     border-bottom: 1px solid #e0e0e0;
 }
 
@@ -917,15 +917,15 @@ body.fonts-loaded .material-symbols-outlined {
 .etf-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
 }
 
 /* ETF 單行項目（橫向一排） */
 .etf-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
+    gap: 4px;
+    padding: 4px 6px;
     border-radius: 4px;
     transition: background 0.2s;
 }
@@ -936,7 +936,7 @@ body.fonts-loaded .material-symbols-outlined {
 
 .etf-divider {
     border-top: 1px solid #e0e0e0;
-    margin: 6px 0;
+    margin: 4px 0;
 }
 
 /* 世界組合 ETF 項目樣式（無國旗） */
@@ -961,14 +961,14 @@ body.fonts-loaded .material-symbols-outlined {
 }
 
 .etf-flag {
-    width: 24px;
+    width: 22px;
     height: auto;
     border-radius: 2px;
     flex-shrink: 0;
 }
 
 .etf-country {
-    width: 50px;
+    width: 56px;
     font-size: 12px;
     color: #333;
     font-weight: 500;
@@ -976,8 +976,8 @@ body.fonts-loaded .material-symbols-outlined {
 }
 
 .etf-symbol {
-    width: 50px;
-    font-size: 16px;  /* 放大字體，成為視覺焦點 */
+    width: 46px;
+    font-size: 15px;  /* 放大字體，成為視覺焦點 */
     color: #1a73e8;  /* 藍色強調 */
     font-weight: 700;  /* 加粗 */
     font-family: monospace;
@@ -985,7 +985,7 @@ body.fonts-loaded .material-symbols-outlined {
 }
 
 .etf-price {
-    width: 60px;
+    width: 52px;
     font-size: 13px;
     color: #333;
     font-weight: 600;
@@ -994,7 +994,7 @@ body.fonts-loaded .material-symbols-outlined {
 }
 
 .etf-change {
-    width: 70px;
+    width: 62px;
     font-size: 12px;
     font-weight: 600;
     text-align: right;
