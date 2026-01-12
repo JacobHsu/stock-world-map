@@ -58,7 +58,7 @@ const STOCK_INDICES = {
         timezone: +1,
         marketHours: '08:00-14:00',
         timeNote: '早台股1小時',
-        holiday: '12/31-1/3 新年休市'  // 日本新年假期至1/3
+        holiday: { message: '新年休市', startDate: '12-31', endDate: '01-03' }  // 日本新年假期
     },
     hk: {
         symbol: '^HSI',
@@ -246,6 +246,48 @@ class StockDataManager {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    /**
+     * 檢查當前日期是否在假期範圍內
+     * @param {Object} holiday - 假期配置 { message: string, startDate: 'MM-DD', endDate: 'MM-DD' }
+     * @returns {boolean} - 是否在假期範圍內
+     */
+    isWithinHolidayPeriod(holiday) {
+        if (!holiday || typeof holiday === 'string') {
+            // 舊格式或無假期資訊
+            return false;
+        }
+
+        const now = new Date();
+        const taipeiTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Taipei' }));
+        const currentYear = taipeiTime.getFullYear();
+        const currentMonth = taipeiTime.getMonth() + 1; // 0-indexed
+        const currentDay = taipeiTime.getDate();
+
+        // 解析開始和結束日期 (格式: MM-DD)
+        const [startMonth, startDay] = holiday.startDate.split('-').map(Number);
+        const [endMonth, endDay] = holiday.endDate.split('-').map(Number);
+
+        // 處理跨年情況 (例如 12/31 - 1/3)
+        if (startMonth > endMonth) {
+            // 跨年假期
+            if (currentMonth === startMonth && currentDay >= startDay) {
+                // 在年底部分 (例如 12/31)
+                return true;
+            } else if (currentMonth === endMonth && currentDay <= endDay) {
+                // 在年初部分 (例如 1/1-1/3)
+                return true;
+            }
+            return false;
+        } else {
+            // 同年假期
+            const currentDate = currentMonth * 100 + currentDay;
+            const startDate = startMonth * 100 + startDay;
+            const endDate = endMonth * 100 + endDay;
+            return currentDate >= startDate && currentDate <= endDate;
+        }
+    }
+
+
     getMarketStatus(countryCode, marketState) {
         // 先使用 API 返回的狀態
         if (marketState === 'REGULAR') {
@@ -391,9 +433,10 @@ class StockUIUpdater {
             // 組合狀態文字
             let statusHTML = status.text;
 
-            // 如果有休市資訊且市場已收盤，優先顯示
-            if (holiday && status.class === 'closed') {
-                statusHTML = `<span class="holiday-note">📅 ${holiday}</span>`;
+            // 如果有休市資訊且市場已收盤，檢查是否在假期範圍內
+            if (holiday && status.class === 'closed' && this.dataManager.isWithinHolidayPeriod(holiday)) {
+                const holidayMessage = typeof holiday === 'string' ? holiday : holiday.message;
+                statusHTML = `<span class="holiday-note">📅 ${holidayMessage}</span>`;
             } else if (timeNote && status.class === 'closed') {
                 statusHTML = `${status.text} <span class="time-note">${timeNote}</span>`;
             }
