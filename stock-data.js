@@ -333,6 +333,20 @@ class StockDataManager {
                 // 中國: 09:30-15:00
                 isOpen = (timeInMinutes >= 9 * 60 + 30) && (timeInMinutes < 15 * 60);
                 break;
+            case 'us':
+                // 美國: 21:30-04:00 (台北時間，跨日)
+                // 夏令時間: 21:30-04:00, 冬令時間: 22:30-05:00
+                isOpen = (timeInMinutes >= 21 * 60 + 30) || (timeInMinutes < 4 * 60);
+                break;
+            case 'gb':
+                // 英國: 16:00-00:30 (台北時間，跨日)
+                isOpen = (timeInMinutes >= 16 * 60) || (timeInMinutes < 0 * 60 + 30);
+                break;
+            case 'de':
+            case 'fr':
+                // 德國/法國: 16:00-00:30 (台北時間，跨日)
+                isOpen = (timeInMinutes >= 16 * 60) || (timeInMinutes < 0 * 60 + 30);
+                break;
             default:
                 // 其他市場依賴 API 狀態
                 break;
