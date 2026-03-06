@@ -148,9 +148,9 @@ body.fonts-loaded .material-symbols-outlined {
     z-index: 1000;
 }
 
-/* Position Display - 位置調整功能 (已隱藏) */
+/* Position Display - 位置調整功能 */
 .position-display {
-    display: none;  /* 已關閉位置調整功能 */
+    display: block;
     position: absolute;
     top: 4px;
     right: 4px;
@@ -933,7 +933,7 @@ body.fonts-loaded .material-symbols-outlined {
 }
 
 .etf-position-display {
-    display: none;  /* 隱藏位置調整功能 */
+    display: block;
     font-size: 10px;
     color: #999;
     font-family: monospace;

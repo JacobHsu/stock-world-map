@@ -35,6 +35,71 @@ var etfOnlyCountries = [
     'za'
 ];
 
+// ============================================================
+// 卡片位置設定（依螢幕尺寸分組）
+// 調整方式：在目標螢幕上拖曳卡片，複製 console 輸出的座標，
+// 貼入對應 breakpoint 的設定後儲存即可生效。
+// ============================================================
+const CARD_POSITIONS = {
+    // 大螢幕（> 1440px）
+    default: {
+        'us':                { left: '23.7%', top: '32.6%' },
+        'gb':                { left: '38.1%', top: '28.5%' },
+        'de':                { left: '53.4%', top: '40.9%' },
+        'fr':                { left: '38.5%', top: '49.3%' },
+        'kr':                { left: '65.7%', top: '40.9%' },
+        'jp':                { left: '81%',   top: '45%'   },
+        'hk':                { left: '62.7%', top: '60.2%' },
+        'tw':                { left: '77%',   top: '60%'   },
+        'etf-world':         { left: '88.7%', top: '1.2%'  },
+        'etf-northamerica':  { left: '11.3%', top: '46.8%' },
+        'etf-southamerica':  { left: '20.2%', top: '73.4%' },
+        'etf-westeurope':    { left: '33.9%', top: '26.9%' },
+        'etf-southeurope':   { left: '44.2%', top: '57.2%' },
+        'etf-northeurope':   { left: '48.4%', top: '22.6%' },
+        'etf-eastasia':      { left: '72.3%', top: '38.4%' },
+        'etf-asiatigers':    { left: '77.4%', top: '57.1%' },
+        'etf-southeastasia': { left: '60.2%', top: '71.3%' },
+        'etf-australia':     { left: '80.2%', top: '79.1%' },
+        'etf-middleeast':    { left: '57.8%', top: '36.6%' },
+        'etf-africa':        { left: '43.7%', top: '86%'   },
+    },
+    // 13吋螢幕（≤ 1440px）
+    small: {
+        'us':                { left: '15.1%', top: '28.1%' },
+        'gb':                { left: '34.8%', top: '23.7%' },
+        'de':                { left: '53%',   top: '23.6%' },
+        'fr':                { left: '33.3%', top: '48.9%' },
+        'kr':                { left: '65.4%', top: '41.9%' },
+        'jp':                { left: '82.1%', top: '29.5%' },
+        'hk':                { left: '60.5%', top: '60.7%' },
+        'tw':                { left: '82.8%', top: '60.4%' },
+        'etf-world':         { left: '88.7%', top: '1.2%'  },
+        'etf-northamerica':  { left: '11.3%', top: '46.8%' },
+        'etf-southamerica':  { left: '20.2%', top: '73.4%' },
+        'etf-westeurope':    { left: '33.9%', top: '26.9%' },
+        'etf-southeurope':   { left: '44.2%', top: '57.2%' },
+        'etf-northeurope':   { left: '48.4%', top: '22.6%' },
+        'etf-eastasia':      { left: '72.3%', top: '38.4%' },
+        'etf-asiatigers':    { left: '77.4%', top: '57.1%' },
+        'etf-southeastasia': { left: '60.2%', top: '71.3%' },
+        'etf-australia':     { left: '80.2%', top: '79.1%' },
+        'etf-middleeast':    { left: '57.8%', top: '36.6%' },
+        'etf-africa':        { left: '43.7%', top: '86%'   },
+    }
+};
+
+function applyCardPositions() {
+    const set = window.innerWidth <= 1440 ? CARD_POSITIONS.small : CARD_POSITIONS.default;
+    Object.entries(set).forEach(([id, pos]) => {
+        const card = document.querySelector(`[data-card-id="${id}"]`);
+        if (card) {
+            card.style.left = pos.left;
+            card.style.top  = pos.top;
+        }
+    });
+}
+
 // 模式切換函數
 function switchMode(mode) {
     if (currentMode === mode) return;
@@ -1067,13 +1132,15 @@ class StockMarketMap {
             const top = this.draggedCard.style.top;
 
             // Update position display
+            const cardId = this.draggedCard.dataset.cardId || '?';
+            const breakpoint = window.innerWidth <= 1440 ? 'small' : 'default';
             if (this.draggedCard.classList.contains('etf-card')) {
                 const cardName = this.draggedCard.querySelector('.etf-card-title')?.textContent || 'ETF Card';
-                console.log(`📍 ${cardName}: left: ${left}; top: ${top}`);
+                console.log(`📍 [${breakpoint}] '${cardId}': { left: '${left}', top: '${top}' },  // ${cardName}`);
                 this.updateETFPositionDisplay(this.draggedCard);
             } else {
                 const cardName = this.draggedCard.querySelector('.index-name')?.textContent || 'Card';
-                console.log(`📍 ${cardName}: left: ${left}; top: ${top}`);
+                console.log(`📍 [${breakpoint}] '${cardId}': { left: '${left}', top: '${top}' },  // ${cardName}`);
                 this.updatePositionDisplay(this.draggedCard);
             }
 
@@ -1149,6 +1216,8 @@ class StockMarketMap {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
+    applyCardPositions();
+
     const app = new StockMarketMap();
 
     // Add smooth scroll behavior
@@ -1156,6 +1225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Log initialization
     console.log('🌍 全球股市指數地圖已載入');
+    console.log(`📐 螢幕寬度: ${window.innerWidth}px → 套用 ${window.innerWidth <= 1440 ? 'small (13吋)' : 'default (大螢幕)'} 位置組`);
 });
 
 // Export for potential module usage
