@@ -317,20 +317,60 @@ body.fonts-loaded .material-symbols-outlined {
 }
 
 /* Responsive Design */
-@media (max-width: 1200px) {
+
+/* 13吋 Retina（~1440px）：卡片輕度縮小 */
+@media (max-width: 1500px) {
     .index-card {
         min-width: 200px;
         padding: 12px;
-        font-size: 14px;
     }
-    
-    .index-name {
-        font-size: 16px;
+
+    .index-name { font-size: 16px; }
+    .index-value { font-size: 19px; }
+    .flag { width: 34px; }
+
+    .etf-card { padding: 8px; }
+    .etf-card-title { font-size: 12px; }
+    .etf-symbol { font-size: 13px; width: 42px; }
+    .etf-country { width: 50px; font-size: 11px; }
+    .etf-price { font-size: 11px; width: 46px; }
+    .etf-change { font-size: 10px; width: 56px; }
+    .etf-flag { width: 18px; }
+    .etf-item { gap: 3px; padding: 3px 4px; }
+}
+
+/* 13吋非 Retina（~1280px）：卡片明顯縮小 */
+@media (max-width: 1300px) {
+    .index-card {
+        min-width: 170px;
+        padding: 10px;
     }
-    
-    .index-value {
-        font-size: 18px;
+
+    .index-name { font-size: 14px; margin-bottom: 6px; }
+    .index-value { font-size: 16px; margin-bottom: 8px; }
+    .change { font-size: 12px; }
+    .flag { width: 28px; }
+    .card-header { gap: 8px; margin-bottom: 8px; }
+    .date { font-size: 11px; }
+    .status { font-size: 10px; padding: 2px 6px; }
+    .sub-index { font-size: 11px; }
+
+    /* 世界組合卡片隱藏（右上角位置在小螢幕易溢出） */
+    .etf-card-world {
+        display: none !important;
     }
+
+    .etf-card { padding: 6px 8px; }
+    .etf-card-title { font-size: 11px; }
+    .etf-symbol { font-size: 12px; width: 38px; }
+
+    /* 隱藏中文國家名稱，只保留國旗 */
+    .etf-country { display: none; }
+
+    .etf-price { font-size: 10px; width: 42px; }
+    .etf-change { font-size: 10px; width: 50px; }
+    .etf-flag { width: 16px; }
+    .etf-item { gap: 3px; padding: 2px 3px; }
 }
 
 @media (max-width: 768px) {
@@ -339,13 +379,13 @@ body.fonts-loaded .material-symbols-outlined {
         min-height: 100vh;
         padding: 80px 20px 20px;
     }
-    
+
     .index-card {
         position: static !important;
         margin-bottom: 16px;
         width: 100%;
     }
-    
+
     .logo {
         font-size: 20px;
     }
