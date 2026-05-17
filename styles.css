@@ -134,6 +134,11 @@ body.fonts-loaded .material-symbols-outlined {
     z-index: 10;
     border: 1px solid #e0e0e0;
     cursor: move;
+    visibility: hidden;
+}
+
+body.cards-positioned .index-card {
+    visibility: visible;
 }
 
 .index-card:hover {

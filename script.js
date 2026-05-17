@@ -1217,6 +1217,7 @@ class StockMarketMap {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     applyCardPositions();
+    document.body.classList.add('cards-positioned');
 
     const app = new StockMarketMap();
 
