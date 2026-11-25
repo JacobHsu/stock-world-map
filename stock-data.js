@@ -80,13 +80,16 @@ const STOCK_INDICES = {
     }
 };
 
-// CORS Proxy 服務列表（2025年可用）
+// CORS Proxy 服務列表
+// 已移除：corsproxy.io（需付費 API key）、proxy.cors.sh（網域已失效）
 const CORS_PROXIES = [
     { url: 'https://api.cors.lol/?url=', name: 'cors.lol' },
-    { url: 'https://corsproxy.io/?', name: 'corsproxy.io' },
-    { url: 'https://api.allorigins.win/raw?url=', name: 'allorigins' },
-    { url: 'https://proxy.cors.sh/', name: 'cors.sh' }
+    { url: 'https://api.allorigins.win/raw?url=', name: 'allorigins' }
 ];
+const PROXY_TIMEOUT_MS = 5000;
+
+// Yahoo spark 批次端點每次最多 20 個代號
+const SPARK_BATCH_SIZE = 20;
 
 /**
  * 股市數據管理類
@@ -112,44 +115,14 @@ class StockDataManager {
 
         for (const proxyIndex of proxyOrder) {
             const proxy = CORS_PROXIES[proxyIndex];
-            const fullUrl = proxy.url + encodeURIComponent(url);
-
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超時
-
-                const response = await fetch(fullUrl, {
-                    method: 'GET',
-                    signal: controller.signal,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-
-                clearTimeout(timeoutId);
-
-                if (response.ok) {
-                    const text = await response.text();
-                    try {
-                        const data = JSON.parse(text);
-                        // 成功後記住這個 proxy
-                        if (this.workingProxyIndex !== proxyIndex) {
-                            console.log(`✅ 使用 ${proxy.name} 成功`);
-                            this.workingProxyIndex = proxyIndex;
-                        }
-                        return data;
-                    } catch (parseError) {
-                        console.warn(`${proxy.name} 返回非 JSON 數據`);
-                        continue;
-                    }
+            const data = await this.tryProxyOnce(proxy, proxy.url + encodeURIComponent(url));
+            if (data !== null) {
+                // 成功後記住這個 proxy
+                if (this.workingProxyIndex !== proxyIndex) {
+                    console.log(`✅ 使用 ${proxy.name} 成功`);
+                    this.workingProxyIndex = proxyIndex;
                 }
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    console.warn(`${proxy.name} 請求超時`);
-                } else {
-                    console.warn(`${proxy.name} 失敗: ${error.message}`);
-                }
-                continue;
+                return data;
             }
         }
 
@@ -157,41 +130,98 @@ class StockDataManager {
     }
 
     /**
-     * 使用 Yahoo Finance API 獲取股票數據
+     * 對單一 proxy 發送一次請求，成功回傳 JSON，失敗回傳 null
      */
-    async fetchQuote(symbol) {
-        const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=2d`;
+    async tryProxyOnce(proxy, fullUrl) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS);
 
         try {
-            const data = await this.fetchWithProxy(yahooUrl);
+            const response = await fetch(fullUrl, {
+                method: 'GET',
+                signal: controller.signal,
+                headers: { 'Accept': 'application/json' }
+            });
 
-            if (data.chart && data.chart.result && data.chart.result[0]) {
-                const result = data.chart.result[0];
-                const meta = result.meta;
-
-                const currentPrice = meta.regularMarketPrice || meta.previousClose;
-                const previousClose = meta.chartPreviousClose || meta.previousClose;
-                const change = currentPrice - previousClose;
-                const changePercent = previousClose ? (change / previousClose) * 100 : 0;
-
-                return {
-                    symbol: symbol,
-                    price: currentPrice,
-                    previousClose: previousClose,
-                    change: change,
-                    changePercent: changePercent,
-                    currency: meta.currency || 'USD',
-                    marketState: meta.marketState || 'CLOSED',
-                    exchangeTimezoneName: meta.exchangeTimezoneName,
-                    regularMarketTime: meta.regularMarketTime ? new Date(meta.regularMarketTime * 1000) : new Date()
-                };
+            if (!response.ok) {
+                console.warn(`${proxy.name} 回應 ${response.status}`);
+                return null;
             }
 
-            return null;
+            try {
+                return JSON.parse(await response.text());
+            } catch (parseError) {
+                console.warn(`${proxy.name} 返回非 JSON 數據`);
+                return null;
+            }
         } catch (error) {
-            console.warn(`⚠️ 獲取 ${symbol} 數據失敗:`, error.message);
+            console.warn(error.name === 'AbortError' ? `${proxy.name} 請求超時` : `${proxy.name} 失敗: ${error.message}`);
+            return null;
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
+    /**
+     * 使用 Yahoo Finance spark 批次端點一次獲取多個代號（每批最多 20 個）
+     * 批次依序送出，避免同時打爆 proxy 的限流配額
+     * @returns {Object} { [symbol]: quote | null }
+     */
+    async fetchQuotes(symbols) {
+        const quotes = {};
+        symbols.forEach(s => { quotes[s] = null; });
+
+        for (let i = 0; i < symbols.length; i += SPARK_BATCH_SIZE) {
+            if (i > 0) {
+                await this.delay(1000);  // 批次間隔，降低觸發限流的機率
+            }
+            const batch = symbols.slice(i, i + SPARK_BATCH_SIZE);
+            const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/spark?symbols=${batch.map(encodeURIComponent).join(',')}&range=5d&interval=1d`;
+
+            try {
+                const data = await this.fetchWithProxy(yahooUrl);
+                for (const symbol of batch) {
+                    quotes[symbol] = this.parseSparkQuote(symbol, data[symbol]);
+                }
+            } catch (error) {
+                console.warn(`⚠️ 批次獲取失敗 (${batch.join(',')}):`, error.message);
+            }
+        }
+
+        return quotes;
+    }
+
+    /**
+     * 解析 spark 單一代號資料（range=5d 的每日收盤）
+     * 取最後兩個有值的收盤價比較：盤中最後一筆即為即時價
+     * 不用 fulldayChange / chartPreviousClose：開盤前會出現 0% 或非前一交易日的值
+     */
+    parseSparkQuote(symbol, item) {
+        if (!item || !Array.isArray(item.close)) {
             return null;
         }
+
+        const bars = item.close
+            .map((close, i) => ({ close, ts: item.timestamp?.[i] }))
+            .filter(b => typeof b.close === 'number');
+        if (bars.length < 2) {
+            return null;
+        }
+
+        const price = bars[bars.length - 1].close;
+        const previousClose = bars[bars.length - 2].close;
+        const change = price - previousClose;
+        const lastTs = bars[bars.length - 1].ts;
+
+        return {
+            symbol: symbol,
+            price: price,
+            previousClose: previousClose,
+            change: change,
+            changePercent: (change / previousClose) * 100,
+            marketState: 'CLOSED',  // spark 不提供市場狀態，交由本地時間判斷
+            regularMarketTime: lastTs ? new Date(lastTs * 1000) : new Date()
+        };
     }
 
     /**
@@ -214,22 +244,15 @@ class StockDataManager {
             results[countryCode] = { main: null, sub: [] };
         }
 
-        // 並行獲取所有主要指數
-        const fetchPromises = Object.entries(STOCK_INDICES).map(async ([countryCode, config]) => {
-            try {
-                const mainData = await this.fetchQuote(config.symbol);
-                results[countryCode].main = mainData;
-
-                if (mainData) {
-                    console.log(`📈 ${config.name}: ${mainData.price?.toFixed(2)} (${mainData.changePercent?.toFixed(2)}%)`);
-                }
-            } catch (error) {
-                console.warn(`⚠️ ${config.name} 獲取失敗`);
+        // 一次批次請求獲取所有主要指數
+        const quotes = await this.fetchQuotes(Object.values(STOCK_INDICES).map(c => c.symbol));
+        for (const [countryCode, config] of Object.entries(STOCK_INDICES)) {
+            const mainData = quotes[config.symbol];
+            results[countryCode].main = mainData;
+            if (mainData) {
+                console.log(`📈 ${config.name}: ${mainData.price.toFixed(2)} (${mainData.changePercent.toFixed(2)}%)`);
             }
-        });
-
-        // 等待所有請求完成
-        await Promise.all(fetchPromises);
+        }
 
         this.cache = results;
         this.lastUpdate = new Date();
@@ -584,31 +607,18 @@ class ETFDataManager extends StockDataManager {
         });
 
 
-        // 並行獲取所有 ETF
-        const fetchPromises = ETF_CONFIG.etfs.map(async (etfConfig) => {
-            try {
-                const data = await this.fetchQuote(etfConfig.symbol);
-                results[etfConfig.symbol] = {
-                    config: etfConfig,
-                    data: data
-                };
+        // 批次獲取所有 ETF（每批 20 個）
+        const quotes = await this.fetchQuotes(ETF_CONFIG.etfs.map(e => e.symbol));
+        for (const etfConfig of ETF_CONFIG.etfs) {
+            const data = quotes[etfConfig.symbol];
+            results[etfConfig.symbol] = { config: etfConfig, data: data };
 
-                if (data && data.changePercent !== undefined) {
-                    countryAggregation[etfConfig.country].etfs.push(etfConfig.symbol);
-                    countryAggregation[etfConfig.country].changes.push(data.changePercent);
-                    console.log(`📊 ${etfConfig.symbol} (${etfConfig.countryName}): ${data.price?.toFixed(2)} (${data.changePercent?.toFixed(2)}%)`);
-                }
-            } catch (error) {
-                console.warn(`⚠️ ${etfConfig.symbol} 獲取失敗`);
-                results[etfConfig.symbol] = {
-                    config: etfConfig,
-                    data: null
-                };
+            if (data) {
+                countryAggregation[etfConfig.country].etfs.push(etfConfig.symbol);
+                countryAggregation[etfConfig.country].changes.push(data.changePercent);
+                console.log(`📊 ${etfConfig.symbol} (${etfConfig.countryName}): ${data.price.toFixed(2)} (${data.changePercent.toFixed(2)}%)`);
             }
-        });
-
-        // 等待所有請求完成
-        await Promise.all(fetchPromises);
+        }
 
 
         // 計算每個國家的平均漲跌幅
